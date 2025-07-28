@@ -1,12 +1,13 @@
 import { Stack } from "expo-router";
-import { View } from "react-native";
 import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import { AppStateProvider } from "../context/app.context.js";
 
 const isAuth = false;
 
 const Layout = () => {
-
     return (
         <Stack screenOptions={{ headerShown: false }}>
             <Stack.Protected guard={!isAuth}>
@@ -25,15 +26,22 @@ export default function RootLayout() {
         BebasRegular: require("../assets/fonts/BebasNeue-Regular.ttf"),
         GloriaRegular: require("../assets/fonts/GloriaHallelujah-Regular.ttf"),
         LuckiestGuyRegular: require("../assets/fonts/LuckiestGuy-Regular.ttf"),
-        WinkyRoughExtraBold: require("../assets/fonts/winky/WinkyRough-ExtraBold.ttf")
+        WinkyRoughExtraBold: require("../assets/fonts/WinkyRough-ExtraBold.ttf")
     });
 
     if (!loaded) return null;
-
+    
     return (
-        <View style={{ flex: 1 }}>
-            <StatusBar style="auto" />
+        <SafeAreaView
+            style={{
+                flex: 1,
+                backgroundColor: "black" 
+            }}
+        >
+            <StatusBar style="auto" translucent />
+                <AppStateProvider>
             <Layout />
-        </View>
+                </AppStateProvider>
+        </SafeAreaView>
     );
 }
