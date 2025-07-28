@@ -1,11 +1,13 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import chalk from "chalk";
 import { createServer } from "http";
 
 // file imports
 import { initIo } from "./services/socket.service.js";
 import "./config/db.config.js";
+import AuthRoutes from "./routes/auth.routes.js";
 
 // constants
 const app = express();
@@ -21,5 +23,8 @@ app.use(
         origin: "*"
     })
 );
+app.use("/auth", AuthRoutes);
 
-server.listen(PORT, () => console.log(`app started at port ${PORT} 🍄`));
+server.listen(PORT, () =>
+    console.log(chalk.hex("#2ef8ad")(`app started at port ${PORT} 🍄`))
+);

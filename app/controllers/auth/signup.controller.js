@@ -8,42 +8,24 @@ const api = process.env.EXPO_PUBLIC_API;
 
 const handleSignUp = async (data, page, setMessage) => {
     try {
-        setMessage(
-            <Text style={{ color: "#46f489", textAlign: "center" }}>
-                please wait...
-            </Text>
-        );
-        if (data.username.trim().length < 5)
-            return setMessage(
-                <Text style={{ color: "#fa1939", textAlign: "center" }}>
-                    username must contain atleast 5 characters!
-                </Text>
-            );
-        else if (data.password.trim().length < 5)
-            return setMessage(
-                <Text style={{ color: "#fa1939", textAlign: "center" }}>
-                    password must contain atleast 5 characters!
-                </Text>
-            );
+        setMessage("please wait...");
+        if (data.username.trim().length < 8)
+            return setMessage("username must contain atleast 8 characters!");
+        else if (data.password.trim().length < 8)
+            return setMessage("password must contain atleast 8 characters!");
         else if (page === "signup" && data.fullname.trim().length === 0)
-            return setMessage(
-                <Text style={{ color: "#fa1939", textAlign: "center" }}>
-                    enter your full name!
-                </Text>
-            );
+            return setMessage("enter your full name!");
 
         const res = await axios.post(`${api}/auth/${page}`, data);
         const { user, refreshToken, accessToken } = res.data;
-        
+
         storeSession({ user, refreshToken, accessToken });
-        if(res.data.success)
-        return setMessage(
-            <Text style={{ color: "#f853cb", textAlign: "center" }}>
-                Authentication Successfull 💫
-            </Text>
-        );
+        if (res.data.success)
+            return setMessage("Authentication Successfull 💫");
     } catch (error) {
-        console.error(error);
+        console.error(error.message);
+        if (error?.response?.data)
+            setMessage(error.response.data.message?.split("_")?.join(" "));
     }
 };
 

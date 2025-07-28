@@ -4,8 +4,10 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AppStateProvider } from "../context/app.context.js";
+import { storage } from "../storage/storage.js";
 
-const isAuth = false;
+const userId = storage.getString("userId");
+const isAuth = userId?.trim()?.length > 0;
 
 const Layout = () => {
     return (
@@ -30,18 +32,18 @@ export default function RootLayout() {
     });
 
     if (!loaded) return null;
-    
+
     return (
         <SafeAreaView
             style={{
                 flex: 1,
-                backgroundColor: "black" 
+                backgroundColor: "black"
             }}
         >
             <StatusBar style="auto" translucent />
-                <AppStateProvider>
-            <Layout />
-                </AppStateProvider>
+            <AppStateProvider>
+                <Layout />
+            </AppStateProvider>
         </SafeAreaView>
     );
 }

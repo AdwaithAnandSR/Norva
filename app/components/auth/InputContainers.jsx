@@ -10,6 +10,7 @@ import {
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 import handleAuth from "@controllers/auth/signup.controller.js";
+import { isValidUsername, isValidPassword } from "@utils/validateUsername.js";
 
 const { height: vh, width: vw } = Dimensions.get("window");
 
@@ -24,24 +25,26 @@ const InputContainers = ({ page }) => {
     });
 
     const [showPass, setShowPass] = useState(false);
-    const [message, setMessage] = useState(<Text></Text>);
-
-    function validateUsername() {
-        const normalized = formData.username.normalize("NFKC"); // Normalize to standard form
-        const validCharRegex = /[\p{L}._-]/u;
-        const emojiRegex = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u;
-
-        let username = [...normalized]
-            .filter(char => validCharRegex.test(char) && !emojiRegex.test(char))
-            .join("");
-
-        setFormData(prev => ({ ...prev, username }));
-    }
+    const [message, setMessage] = useState();
+    const [isValid, setIsValid] = useState({
+        username: false,
+        password: false
+    });
 
     return (
         <View style={styles.inputCont}>
             <TextInput
-                style={styles.input}
+                style={[
+                    styles.input,
+                    {
+                        borderColor:
+                            formData.username.length === 0
+                                ? "white"
+                                : isValid.username
+                                ? "#53f87e"
+                                : "#fb3270"
+                    }
+                ]}
                 placeholder={"username"}
                 maxLength={25}
                 returnKeyType="next"
@@ -49,12 +52,16 @@ const InputContainers = ({ page }) => {
                 cursorColor="#0ef695"
                 underlineColorAndroid="transparent"
                 value={formData.username}
-                onChangeText={txt =>
+                onChangeText={txt => {
+                    setIsValid(prev => ({
+                        ...prev,
+                        username: isValidUsername(txt)
+                    }));
                     setFormData(prev => ({
                         ...prev,
                         username: txt
-                    }))
-                }
+                    }));
+                }}
                 onSubmitEditing={() => {
                     validateUsername();
                     if (page === "signup" && fullnameRef?.current)
@@ -66,7 +73,11 @@ const InputContainers = ({ page }) => {
             {page === "signup" && (
                 <TextInput
                     ref={fullnameRef}
-                    style={styles.input}
+                    style={[styles.input, { borderColor: formData.fullname.length ===0?'white' : 
+                    formData.fullname.trim().length ? "#53f87e"
+                                : "#fb3270"
+                        
+                    }]}
                     placeholder={"fullname"}
                     returnKeyType="next"
                     selectionColor="#242424da"
@@ -81,10 +92,22 @@ const InputContainers = ({ page }) => {
                     }}
                 />
             )}
+            
             <View>
                 <TextInput
                     ref={passwordRef}
-                    style={[styles.input, { paddingRight: vw * 0.1 }]}
+                    style={[
+                        styles.input,
+                        {
+                            paddingRight: vw * 0.1,
+                            borderColor:
+                                formData.password.length === 0
+                                    ? "white"
+                                    : isValid.password
+                                    ? "#53f87e"
+                                    : "#fb3270"
+                        }
+                    ]}
                     placeholder={"password"}
                     secureTextEntry={!showPass}
                     autoCapitalize={"none"}
@@ -93,9 +116,13 @@ const InputContainers = ({ page }) => {
                     cursorColor="#0ef695"
                     underlineColorAndroid="transparent"
                     value={formData.password}
-                    onChangeText={txt =>
-                        setFormData(prev => ({ ...prev, password: txt }))
-                    }
+                    onChangeText={txt => {
+                        setIsValid(prev => ({
+                            ...prev,
+                            password: isValidPassword(txt)
+                        }));
+                        setFormData(prev => ({ ...prev, password: txt }));
+                    }}
                 />
                 <TouchableOpacity
                     style={styles.eyeIcon}
@@ -117,21 +144,15 @@ const InputContainers = ({ page }) => {
                 </TouchableOpacity>
             </View>
 
+            <Text style={styles.infoText}>{message}</Text>
+
             <TouchableOpacity
                 onPress={async () => {
-                    if(page === "signup" ){
-                    setMessage(
-                        <Text style={{ color: "#46f489", textAlign: "center" }}>
-                            Formatting username...
-                        </Text>
-                    );
-                    await new Promise(resolve =>
-                        setTimeout(() => resolve(), 500)
-                    );
-
-                    validateUsername();
-                    }
-                    handleAuth(formData, page, setMessage);
+                    if (
+                        isValidPassword(formData.password) &&
+                        isValidUsername(formData.username)
+                    )
+                        handleAuth(formData, page, setMessage);
                 }}
                 style={[
                     styles.button,
@@ -145,7 +166,6 @@ const InputContainers = ({ page }) => {
                     {page === "signin" ? "Sign In" : "Sign Up"}
                 </Text>
             </TouchableOpacity>
-            {message}
         </View>
     );
 };
@@ -179,12 +199,16 @@ const styles = StyleSheet.create({
         borderRadius: 28,
         justifyContent: "center",
         alignItems: "center",
-        marginTop: vh * 0.03
+        marginTop: vh * 0.01
     },
     buttonText: {
         fontSize: vw * 0.07,
         fontFamily: "LuckiestGuyRegular",
         color: "white"
+    },
+    infoText: {
+        color: "white",
+        textAlign: "center"
     }
 });
 

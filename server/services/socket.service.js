@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-
+import chalk from "chalk";
 let io;
 
 export const initIo = server => {
@@ -16,7 +16,7 @@ export const initIo = server => {
                 origin: "*"
             }
         });
-        console.log("socket initialised 🎊");
+        console.log(chalk.hex("#f82dbb")("\nsocket initialised 🎊"));
         // io.sockets.sockets.size : connected users
         return io;
     } catch (err) {
