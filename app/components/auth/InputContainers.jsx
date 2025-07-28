@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
+import handleAuth from "@controllers/auth/signup.controller.js";
+
 const { height: vh, width: vw } = Dimensions.get("window");
 
 const InputContainers = ({ page }) => {
@@ -22,6 +24,7 @@ const InputContainers = ({ page }) => {
     });
 
     const [showPass, setShowPass] = useState(false);
+    const [message, setMessage] = useState(<Text></Text>);
 
     function validateUsername() {
         const normalized = formData.username.normalize("NFKC"); // Normalize to standard form
@@ -93,7 +96,6 @@ const InputContainers = ({ page }) => {
                     onChangeText={txt =>
                         setFormData(prev => ({ ...prev, password: txt }))
                     }
-                    onSubmitEditing={() => console.log(formData)}
                 />
                 <TouchableOpacity
                     style={styles.eyeIcon}
@@ -116,6 +118,21 @@ const InputContainers = ({ page }) => {
             </View>
 
             <TouchableOpacity
+                onPress={async () => {
+                    if(page === "signup" ){
+                    setMessage(
+                        <Text style={{ color: "#46f489", textAlign: "center" }}>
+                            Formatting username...
+                        </Text>
+                    );
+                    await new Promise(resolve =>
+                        setTimeout(() => resolve(), 500)
+                    );
+
+                    validateUsername();
+                    }
+                    handleAuth(formData, page, setMessage);
+                }}
                 style={[
                     styles.button,
                     {
@@ -128,6 +145,7 @@ const InputContainers = ({ page }) => {
                     {page === "signin" ? "Sign In" : "Sign Up"}
                 </Text>
             </TouchableOpacity>
+            {message}
         </View>
     );
 };
@@ -135,7 +153,6 @@ const InputContainers = ({ page }) => {
 const styles = StyleSheet.create({
     inputCont: {
         width: "100%",
-        
         marginTop: vh * 0.05,
         gap: vh * 0.02
     },
