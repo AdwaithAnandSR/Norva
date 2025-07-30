@@ -8,29 +8,34 @@ import { useUserStore } from "@store/user.store.js";
 const api = process.env.EXPO_PUBLIC_API;
 
 const handleSignUp = async (data, page, setMessage) => {
+    const handleMessage = msg => {
+        if (page === "signup") {
+            setMessage(prev => ({ ...prev, response: msg }));
+        } else setMessage(msg);
+    };
+
     const setAllToStore = useUserStore.getState().setAll;
     try {
-        setMessage("please wait...");
+        handleMessage("please wait...");
+
         if (data.username.trim().length < 8)
-            return setMessage("username must contain atleast 8 characters!");
+            return handleMessage("username must contain atleast 8 characters!");
         else if (data.password.trim().length < 8)
-            return setMessage("password must contain atleast 8 characters!");
+            return handleMessage("password must contain atleast 8 characters!");
         else if (page === "signup" && data.fullname.trim().length === 0)
-            return setMessage("enter your full name!");
+            return handleMessage("enter fullname!");
 
         const res = await axios.post(`${api}/auth/${page}`, data);
-        const { user, refreshToken, accessToken } = res.data;
 
-        const { username, fullname, role, _id: userId } = user;
+        const { user, refreshToken, accessToken } = res.data;
 
         storeSession({
             refreshToken,
             accessToken,
-            username,
-            fullname,
-            role,
-            userId
+            user
         });
+
+        const { username, fullname, role, _id: userId } = user;
         
         setAllToStore({
             username,
@@ -39,11 +44,12 @@ const handleSignUp = async (data, page, setMessage) => {
             userId
         });
         if (res.data.success)
-            return setMessage("Authentication Successfull 💫");
+            return handleMessage("Authentication Successfull 💫");
     } catch (error) {
-        console.log(error.message);
+        console.log("Error while authentication: ", error.message);
         if (error?.response?.data)
-            setMessage(error.response.data.message?.split("_")?.join(" "));
+            handleMessage(error.response.data.message?.split("_")?.join(" "));
+        else handleMessage(error.message);
     }
 };
 

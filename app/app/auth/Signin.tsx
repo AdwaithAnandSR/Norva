@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 
-import InputContainers from "@components/auth/InputContainers.jsx";
+import SigninInputs from "@components/auth/SigninInputs.jsx";
 
 const { height: vh, width: vw } = Dimensions.get("window");
 
@@ -25,7 +25,9 @@ const Signin = () => {
                 keyboardShouldPersistTaps="handled"
             >
                 <Text style={styles.headerText}>Sign In</Text>
-                <InputContainers page={"signin"} />
+
+                <SigninInputs />
+
                 <View style={styles.textCont}>
                     <Text style={styles.text}>Don't have an account? </Text>
                     <TouchableOpacity

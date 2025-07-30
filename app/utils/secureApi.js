@@ -1,5 +1,7 @@
 import axios from "axios";
-import { storage , saveTokens} from "../storage/storage.js";
+
+import { storage , saveTokens, revokeSession} from "../storage/storage.js";
+import { useUserStore } from "@store/user.store.js"
 
 const API_URL = process.env.EXPO_PUBLIC_API;
 const api = axios.create({ baseURL: API_URL });
@@ -17,20 +19,16 @@ api.interceptors.response.use(
     async error => {
         const originalRequest = error.config;
 
-        console.log(error.response.status);
-
         // Prevent infinite loops
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
             try {
-                console.log("fetching saved token ...");
                 const savedRefreshToken = storage.getString("refreshToken");
                 if (!savedRefreshToken)
                     throw new Error("No refresh token available");
 
                 try {
-                    console.log("fetching new token ...");
                     const res = await axios.post(
                         `${API_URL}/auth/refreshTokens`,
                         {
@@ -38,22 +36,20 @@ api.interceptors.response.use(
                         }
                     );
 
-                    console.log("response: .", res.data);
                     const { accessToken, refreshToken } = res.data;
-                    console.log(
-                        "setting new tokens: ",
-                        accessToken,
-                        "\n",
-                        refreshToken
-                    );
+
                     saveTokens({ accessToken, refreshToken });
 
                     // Retry original request with new access token
                     originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-                    console.log("new request ", originalRequest);
                     return api(originalRequest);
                 } catch (error) {
                     console.error(error);
+                    
+                    // logout
+                    
+                    useUserStore.getState().clearAll()
+                    revokeSession()
                 }
             } catch (refreshError) {
                 return Promise.reject(refreshError);

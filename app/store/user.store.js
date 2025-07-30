@@ -4,8 +4,6 @@ import { getUser } from "../storage/storage.js";
 
 const { userId, username, role, fullname } = getUser();
 
-console.log("log from userStore", username, userId, role, fullname);
-
 export const useUserStore = create((set, get) => ({
     username: username || "",
     userId: userId || "",

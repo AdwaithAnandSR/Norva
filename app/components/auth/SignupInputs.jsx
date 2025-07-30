@@ -9,14 +9,14 @@ import {
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
-import handleAuth from "@controllers/auth/signup.controller.js";
-import { isValidUsername, isValidPassword } from "@utils/validateUsername.js";
+import handleAuth from "@controllers/auth/auth.controller.js";
+import { isValidUsername, isValidPassword } from "@utils/validateAuthData.js";
 
 const { height: vh, width: vw } = Dimensions.get("window");
 
-const InputContainers = ({ page }) => {
-    const fullnameRef = useRef(),
-        passwordRef = useRef();
+const SignupInputs = () => {
+    const fullnameRef = useRef();
+    const passwordRef = useRef();
 
     const [formData, setFormData] = useState({
         username: "",
@@ -27,8 +27,10 @@ const InputContainers = ({ page }) => {
     const [showPass, setShowPass] = useState(false);
     const [message, setMessage] = useState({
         username: "",
-        password: ""
+        password: "",
+        response: ""
     });
+
     const [isValid, setIsValid] = useState({
         username: false,
         password: false
@@ -57,51 +59,41 @@ const InputContainers = ({ page }) => {
                 underlineColorAndroid="transparent"
                 value={formData.username}
                 onChangeText={txt => {
-                    if(page === "signup")
                     setIsValid(prev => ({
                         ...prev,
                         username: isValidUsername(txt, setMessage)
                     }));
-                    setFormData(prev => ({
-                        ...prev,
-                        username: txt
-                    }));
+                    setFormData(prev => ({ ...prev, username: txt }));
                 }}
-                onSubmitEditing={() => {
-                    if (page === "signup" && fullnameRef?.current)
-                        fullnameRef.current.focus();
-                    else passwordRef.current.focus();
-                }}
+                onSubmitEditing={() => fullnameRef?.current?.focus()}
             />
 
-            {page === "signup" && (
-                <TextInput
-                    ref={fullnameRef}
-                    style={[
-                        styles.input,
-                        {
-                            borderColor:
-                                formData.fullname.length === 0
-                                    ? "white"
-                                    : formData.fullname.trim().length
-                                    ? "#53f87e"
-                                    : "#fb3270"
-                        }
-                    ]}
-                    placeholder={"fullname"}
-                    returnKeyType="next"
-                    selectionColor="#242424da"
-                    cursorColor="#0ef695"
-                    underlineColorAndroid="transparent"
-                    value={formData.fullname}
-                    onChangeText={txt =>
-                        setFormData(prev => ({ ...prev, fullname: txt }))
+            <Text style={styles.infoText}></Text>
+            <TextInput
+                ref={fullnameRef}
+                style={[
+                    styles.input,
+                    {
+                        borderColor:
+                            formData.fullname.length === 0
+                                ? "white"
+                                : formData.fullname.trim().length
+                                ? "#53f87e"
+                                : "#fb3270"
                     }
-                    onSubmitEditing={() => {
-                        if (passwordRef?.current) passwordRef.current.focus();
-                    }}
-                />
-            )}
+                ]}
+                placeholder={"fullname"}
+                returnKeyType="next"
+                selectionColor="#242424da"
+                cursorColor="#0ef695"
+                underlineColorAndroid="transparent"
+                value={formData.fullname}
+                onChangeText={txt =>
+                    setFormData(prev => ({ ...prev, fullname: txt }))
+                }
+                onSubmitEditing={() => passwordRef?.current?.focus()}
+            />
+
             <Text style={styles.infoText}>{message.password}</Text>
             <View>
                 <TextInput
@@ -127,7 +119,6 @@ const InputContainers = ({ page }) => {
                     underlineColorAndroid="transparent"
                     value={formData.password}
                     onChangeText={txt => {
-                        if(page === "signup")
                         setIsValid(prev => ({
                             ...prev,
                             password: isValidPassword(txt, setMessage)
@@ -139,41 +130,29 @@ const InputContainers = ({ page }) => {
                     style={styles.eyeIcon}
                     onPress={() => setShowPass(prev => !prev)}
                 >
-                    {showPass ? (
-                        <MaterialCommunityIcons
-                            name="eye-outline"
-                            size={22}
-                            color="white"
-                        />
-                    ) : (
-                        <MaterialCommunityIcons
-                            name="eye-off-outline"
-                            size={22}
-                            color="white"
-                        />
-                    )}
+                    <MaterialCommunityIcons
+                        name={showPass ? "eye-outline" : "eye-off-outline"}
+                        size={22}
+                        color="white"
+                    />
                 </TouchableOpacity>
             </View>
 
+            <Text style={styles.resText}>{message.response}</Text>
+
             <TouchableOpacity
-                onPress={async () => {
+                onPress={() => {
                     if (
-                        isValidPassword(formData.password) &&
-                        isValidUsername(formData.username)
-                    )
-                        handleAuth(formData, page, setMessage);
-                }}
-                style={[
-                    styles.button,
-                    {
-                        backgroundColor:
-                            page === "signin" ? "#01d177" : "#f20686"
+                        isValidPassword(formData.password, setMessage) &&
+                        isValidUsername(formData.username, setMessage)
+                    ) {
+                        // alert(isValidPassword(formData.password));
+                        handleAuth(formData, "signup", setMessage);
                     }
-                ]}
+                }}
+                style={[styles.button, { backgroundColor: "#f20686" }]}
             >
-                <Text style={styles.buttonText}>
-                    {page === "signin" ? "Sign In" : "Sign Up"}
-                </Text>
+                <Text style={styles.buttonText}>Sign Up</Text>
             </TouchableOpacity>
         </View>
     );
@@ -183,14 +162,12 @@ const styles = StyleSheet.create({
     inputCont: {
         width: "100%",
         marginTop: vh * 0.05,
-        gap: vh * 0.0085
+        gap: vh * 0.005
     },
     input: {
         width: "100%",
-        // height: vh * 0.075,
         borderRadius: 28,
         borderWidth: 1,
-        borderColor: "white",
         padding: vw * 0.04,
         paddingVertical: vh * 0.025,
         color: "white",
@@ -201,7 +178,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         right: 15,
         top: "50%",
-        transform: [{ translateY: "-50%" }]
+        transform: [{ translateY: -11 }]
     },
     button: {
         width: "100%",
@@ -219,9 +196,13 @@ const styles = StyleSheet.create({
     infoText: {
         color: "white",
         textAlign: "center",
-        fontSize: 12
-        // backgroundColor: "green"
+        fontSize: 11
+    },
+    resText: {
+        color: "white",
+        textAlign: "center",
+        fontSize: 16
     }
 });
 
-export default InputContainers;
+export default SignupInputs;
