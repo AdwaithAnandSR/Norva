@@ -8,6 +8,7 @@ import { createServer } from "http";
 import { initIo } from "./services/socket.service.js";
 import "./config/db.config.js";
 import AuthRoutes from "./routes/auth.routes.js";
+import PostRoutes from "./routes/post.routes.js";
 
 // constants
 const app = express();
@@ -24,6 +25,7 @@ app.use(
     })
 );
 app.use("/auth", AuthRoutes);
+app.use("/post", PostRoutes);
 
 server.listen(PORT, () =>
     console.log(chalk.hex("#2ef8ad")(`app started at port ${PORT} 🍄`))

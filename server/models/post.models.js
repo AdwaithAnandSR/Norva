@@ -36,6 +36,6 @@ const postSchema = mongoose.Schema(
     { timestamp: true }
 );
 
-postSchema.index({ userId: 1, createdAt: -1 });
+// postSchema.index({ userId: 1, createdAt: -1 });
 
 export default mongoose.model("post", postSchema);

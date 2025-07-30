@@ -25,7 +25,10 @@ const InputContainers = ({ page }) => {
     });
 
     const [showPass, setShowPass] = useState(false);
-    const [message, setMessage] = useState();
+    const [message, setMessage] = useState({
+        username: "",
+        password: ""
+    });
     const [isValid, setIsValid] = useState({
         username: false,
         password: false
@@ -33,6 +36,7 @@ const InputContainers = ({ page }) => {
 
     return (
         <View style={styles.inputCont}>
+            <Text style={styles.infoText}>{message.username}</Text>
             <TextInput
                 style={[
                     styles.input,
@@ -53,9 +57,10 @@ const InputContainers = ({ page }) => {
                 underlineColorAndroid="transparent"
                 value={formData.username}
                 onChangeText={txt => {
+                    if(page === "signup")
                     setIsValid(prev => ({
                         ...prev,
-                        username: isValidUsername(txt)
+                        username: isValidUsername(txt, setMessage)
                     }));
                     setFormData(prev => ({
                         ...prev,
@@ -63,7 +68,6 @@ const InputContainers = ({ page }) => {
                     }));
                 }}
                 onSubmitEditing={() => {
-                    validateUsername();
                     if (page === "signup" && fullnameRef?.current)
                         fullnameRef.current.focus();
                     else passwordRef.current.focus();
@@ -73,11 +77,17 @@ const InputContainers = ({ page }) => {
             {page === "signup" && (
                 <TextInput
                     ref={fullnameRef}
-                    style={[styles.input, { borderColor: formData.fullname.length ===0?'white' : 
-                    formData.fullname.trim().length ? "#53f87e"
-                                : "#fb3270"
-                        
-                    }]}
+                    style={[
+                        styles.input,
+                        {
+                            borderColor:
+                                formData.fullname.length === 0
+                                    ? "white"
+                                    : formData.fullname.trim().length
+                                    ? "#53f87e"
+                                    : "#fb3270"
+                        }
+                    ]}
                     placeholder={"fullname"}
                     returnKeyType="next"
                     selectionColor="#242424da"
@@ -92,7 +102,7 @@ const InputContainers = ({ page }) => {
                     }}
                 />
             )}
-            
+            <Text style={styles.infoText}>{message.password}</Text>
             <View>
                 <TextInput
                     ref={passwordRef}
@@ -117,9 +127,10 @@ const InputContainers = ({ page }) => {
                     underlineColorAndroid="transparent"
                     value={formData.password}
                     onChangeText={txt => {
+                        if(page === "signup")
                         setIsValid(prev => ({
                             ...prev,
-                            password: isValidPassword(txt)
+                            password: isValidPassword(txt, setMessage)
                         }));
                         setFormData(prev => ({ ...prev, password: txt }));
                     }}
@@ -143,8 +154,6 @@ const InputContainers = ({ page }) => {
                     )}
                 </TouchableOpacity>
             </View>
-
-            <Text style={styles.infoText}>{message}</Text>
 
             <TouchableOpacity
                 onPress={async () => {
@@ -174,15 +183,16 @@ const styles = StyleSheet.create({
     inputCont: {
         width: "100%",
         marginTop: vh * 0.05,
-        gap: vh * 0.02
+        gap: vh * 0.0085
     },
     input: {
         width: "100%",
-        height: vh * 0.075,
+        // height: vh * 0.075,
         borderRadius: 28,
         borderWidth: 1,
         borderColor: "white",
         padding: vw * 0.04,
+        paddingVertical: vh * 0.025,
         color: "white",
         fontSize: vw * 0.045,
         fontFamily: "SpaceMono"
@@ -199,7 +209,7 @@ const styles = StyleSheet.create({
         borderRadius: 28,
         justifyContent: "center",
         alignItems: "center",
-        marginTop: vh * 0.01
+        marginTop: vh * 0.05
     },
     buttonText: {
         fontSize: vw * 0.07,
@@ -208,7 +218,9 @@ const styles = StyleSheet.create({
     },
     infoText: {
         color: "white",
-        textAlign: "center"
+        textAlign: "center",
+        fontSize: 12
+        // backgroundColor: "green"
     }
 });
 

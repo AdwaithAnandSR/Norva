@@ -50,14 +50,14 @@ const Signin = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: vw * 0.035,
+        paddingHorizontal: vw * 0.035,
         backgroundColor: "black"
     },
     headerText: {
         color: "white",
         fontFamily: "GloriaRegular",
         fontSize: vw * 0.2,
-        marginTop: vh * 0.1
+        marginTop: vh * 0.157
     },
     text: {
         color: "white",
@@ -70,7 +70,8 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        marginTop: vh * 0.03
+        marginTop: vh * 0.03,
+        paddingBottom: vh * 0.1
     },
     text: {
         color: "white",

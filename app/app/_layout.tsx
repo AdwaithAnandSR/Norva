@@ -2,20 +2,32 @@ import { Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import { AppStateProvider } from "../context/app.context.js";
-import { storage } from "../storage/storage.js";
+import { useUserStore } from "@store/user.store.js";
 
-const userId = storage.getString("userId");
-const isAuth = userId?.trim()?.length > 0;
+const client = new QueryClient({
+    defaultOptions: {
+        queries: {
+            retry: (failureCount, error) => {
+                const status = error?.response?.status || error?.status;
+                if (status === 401) return false;
+                else return failureCount < 3;
+            }
+        }
+    }
+});
 
 const Layout = () => {
+    // const isLoggedIn = useUserStore(state => state.isLoggedIn());
+    const isLoggedIn = false
+
     return (
         <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Protected guard={!isAuth}>
+            <Stack.Protected guard={!isLoggedIn}>
                 <Stack.Screen name="auth" />
             </Stack.Protected>
-            <Stack.Protected guard={isAuth}>
+            <Stack.Protected guard={isLoggedIn}>
                 <Stack.Screen name="(secure)/(tabs)" />
             </Stack.Protected>
         </Stack>
@@ -41,9 +53,9 @@ export default function RootLayout() {
             }}
         >
             <StatusBar style="auto" translucent />
-            <AppStateProvider>
+            <QueryClientProvider client={client}>
                 <Layout />
-            </AppStateProvider>
+            </QueryClientProvider>
         </SafeAreaView>
     );
 }

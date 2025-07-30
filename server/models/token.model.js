@@ -16,9 +16,13 @@ const tokenSchema = mongoose.Schema(
             ref: "user",
             required: true
         },
-        revoke: {
+        revoked: {
             type: Boolean,
             default: false
+        },
+        expiresIn:{
+            type: Date,
+            required: true
         }
     },
     {

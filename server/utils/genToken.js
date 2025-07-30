@@ -6,7 +6,7 @@ import Token from "../models/token.model.js";
 
 export const genAccessToken = payload => {
     return jwt.sign({ ...payload }, process.env.JWT_ACCESS_SECRET, {
-        expiresIn: "15s"
+        expiresIn: "1m"
     });
 };
 
@@ -18,7 +18,9 @@ export const genRefreshToken = (payload, jti) => {
 
 export const genToken = async payload => {
     try {
-        if (!payload || !payload.userId) return;
+        if (!payload || !payload.userId || !payload.role) {
+            return console.error("invalid payload for token generaing\npayload: ", payload);
+        };
 
         const jti = uuid();
         const accessToken = genAccessToken(payload);
@@ -29,10 +31,13 @@ export const genToken = async payload => {
 
         const hash = await bcrypt.hash(refreshToken, 10);
 
+        const { exp } = jwt.decode(refreshToken);
+
         await Token.create({
             jti,
             hash,
-            userId: payload.userId
+            userId: payload.userId,
+            expiresIn: new Date(exp * 1000)
         });
 
         return { accessToken, refreshToken };
