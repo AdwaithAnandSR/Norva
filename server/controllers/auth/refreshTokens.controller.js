@@ -21,8 +21,6 @@ const refreshTokens = async (req, res) => {
     const { jti, userId, role } = payload;
     const tokenDoc = await Token.findOne({ jti });
 
-    console.log(tokenDoc);
-
     if (!tokenDoc || tokenDoc?.revoked) {
         return res.status(401).json({ message: "INVALID_REFRESH_TOKEN" });
     }
@@ -41,8 +39,6 @@ const refreshTokens = async (req, res) => {
 
     tokenDoc.revoked = true;
     await tokenDoc.save();
-
-    console.log("providing new access and refresh tokens \n\t", accessToken, "\n\t", newRefreshToken);
 
     return res.status(200).json({
         message: "TOKEN_GENERATED",

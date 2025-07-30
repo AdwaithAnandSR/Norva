@@ -5,12 +5,9 @@ export const isAuthenticated = (req, res, next) => {
         const authorization = req.headers.authorization;
         const token = authorization.split(" ")[1];
 
-        console.log("token for validation: ", token);
-
         const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
 
         const { userId, jti, role } = payload;
-
         req.userId = userId;
 
         next();
