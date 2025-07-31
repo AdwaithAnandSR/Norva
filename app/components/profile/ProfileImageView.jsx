@@ -1,5 +1,12 @@
-import { View, Text, StyleSheet, Dimensions } from "react-native";
+import {
+    View,
+    Text,
+    StyleSheet,
+    Dimensions,
+    TouchableOpacity
+} from "react-native";
 import { Image } from "expo-image";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 import { getUser } from "@storage/storage.js";
 
@@ -7,6 +14,8 @@ const blurhash =
     "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 const { username, fullname } = getUser();
 const { height: vh, width: vw } = Dimensions.get("window");
+
+console.log(getUser());
 
 const ProfileImageView = () => {
     return (
@@ -26,6 +35,7 @@ const ProfileImageView = () => {
                 {fullname}
             </Text>
             <View style={styles.imgContainer}>
+            <TouchableOpacity >
                 <Image
                     source={require("@assets/images/IMG_20250716_130532.jpg")}
                     style={{ width: "100%", height: "100%" }}
@@ -33,7 +43,15 @@ const ProfileImageView = () => {
                     contentFit="cover"
                     transition={1000}
                 />
+            </TouchableOpacity>
             </View>
+            <TouchableOpacity style={styles.editIcon}>
+                <MaterialCommunityIcons
+                    name="pencil-circle"
+                    size={70}
+                    color="#fcded0"
+                />
+            </TouchableOpacity>
         </View>
     );
 };
@@ -43,13 +61,6 @@ const styles = StyleSheet.create({
         paddingVertical: vh * 0.015,
         justifyContent: "center",
         alignItems: "center"
-    },
-    imgContainer: {
-        width: vw * 0.55,
-        height: vw * 0.55,
-        borderRadius: vw * 0.5,
-        overflow: "hidden",
-        borderColor: "white"
     },
     fullname: {
         color: "white",
@@ -67,7 +78,20 @@ const styles = StyleSheet.create({
         zIndex: 2,
         bottom: "10%",
         width: "100%",
-        opacity: 0.3
+        opacity: 0.15
+    },
+    imgContainer: {
+        width: vw * 0.55,
+        height: vw * 0.55,
+        borderRadius: vw * 0.5,
+        overflow: "hidden",
+        borderColor: "white"
+    },
+    editIcon: {
+        position: "absolute",
+        zIndex: 999,
+        right: "25%",
+        bottom: "2%"
     }
 });
 

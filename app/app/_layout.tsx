@@ -19,8 +19,8 @@ const client = new QueryClient({
 });
 
 const Layout = () => {
-    // const isLoggedIn = useUserStore(state => state.isLoggedIn());
-    const isLoggedIn = false
+    const isLoggedIn = useUserStore(state => state.isLoggedIn());
+    // const isLoggedIn = false
 
     return (
         <Stack screenOptions={{ headerShown: false }}>

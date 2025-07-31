@@ -7,11 +7,12 @@ import {
     ScrollView,
     TouchableOpacity
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { getUser } from "@storage/storage.js";
 import ProfileImageView from "@components/profile/ProfileImageView.jsx";
 import ProfileActivityView from "@components/profile/ProfileActivityView.jsx";
-import ProfileHeighlightsView from "@components/profile/ProfileHeighlightsView.jsx";
+import ProfileHighlightsView from "@components/profile/ProfileHighlightsView.jsx";
 import ProfileSettingOptionsView from "@components/profile/ProfileSettingOptionsView.jsx";
 
 const { username } = getUser();
@@ -19,25 +20,36 @@ const { height: vh, width: vw } = Dimensions.get("window");
 
 const Profile = () => {
     return (
-        <ScrollView
-            overScrollMode={"always"}
-            bounces={true}
-            style={styles.container}
-        >
-            <View style={styles.navbar}></View>
-            <Text style={styles.username}>{username}</Text>
-            <ProfileImageView />
-            <ProfileActivityView />
-            <ProfileHeighlightsView />
-            <ProfileSettingOptionsView />
-        </ScrollView>
+        <View overScrollMode={"always"} bounces={true} style={styles.container}>
+            <LinearGradient
+                style={styles.linearBg}
+                colors={[
+                    "rgb(107,86,79)",
+                    "transparent",
+                    "transparent",
+                    "rgba(77,64,60,0.88)"
+                ]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+            >
+                <View style={styles.navbar}></View>
+                <Text style={styles.username}>{username}</Text>
+                <ProfileImageView />
+                <ProfileActivityView />
+                <ProfileHighlightsView />
+                <ProfileSettingOptionsView />
+            </LinearGradient>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "black",
+        backgroundColor: "black"
+    },
+    linearBg: {
+        flex: 1,
         paddingHorizontal: vw * 0.035
     },
     navbar: { height: vh * 0.05 },

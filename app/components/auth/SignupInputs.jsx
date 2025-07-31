@@ -112,7 +112,9 @@ const SignupInputs = () => {
                     ]}
                     placeholder={"password"}
                     secureTextEntry={!showPass}
-                    autoCapitalize={"none"}
+                    autoCapitalize="none"
+                    autoComplete="password"
+                    textContentType="password"
                     returnKeyType="done"
                     selectionColor="#242424da"
                     cursorColor="#0ef695"
