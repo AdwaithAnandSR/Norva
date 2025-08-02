@@ -1,6 +1,7 @@
 import { Stack, Tabs } from "expo-router";
 import { StyleSheet } from "react-native";
 import { Entypo, Feather, FontAwesome, Fontisto } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
 
 const iconSize = 26;
 
@@ -13,7 +14,15 @@ const TabsLayout = () => {
                 tabBarHideOnKeyboard: true,
                 tabBarActiveTintColor: "#0ffba0",
                 tabBarInactiveTintColor: "white",
-                tabBarStyle: styles.tabBarStyle
+                tabBarStyle: styles.tabBarStyle,
+                tabBarBackground: () => (
+                    <BlurView
+                        intensity={80}
+                        tint="dark"
+                        style={styles.blurView}
+                        style={StyleSheet.absoluteFill}
+                    />
+                )
             }}
         >
             <Tabs.Screen
@@ -59,7 +68,6 @@ const TabsLayout = () => {
 
 const styles = StyleSheet.create({
     tabBarStyle: {
-        backgroundColor: "black",
         borderTopWidth: 0,
         borderTopLeftRadius: 23,
         borderTopRightRadius: 23,
@@ -67,9 +75,10 @@ const styles = StyleSheet.create({
         bottom: 0,
         elevation: 20, // fix showing a box behind tabbar
         zIndex: 999999,
-        backgroundColor: "rgba(0,0,0,0.4)",
-        height: 50
-    }
+        height: 50,
+        overflow: "hidden"
+    },
+    
 });
 
 export default TabsLayout;

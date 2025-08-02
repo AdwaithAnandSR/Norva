@@ -6,6 +6,7 @@ import {
     TouchableOpacity
 } from "react-native";
 import { Image } from "expo-image";
+import { BlurView } from "expo-blur";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 import { getUser } from "@storage/storage.js";
@@ -35,15 +36,20 @@ const ProfileImageView = () => {
                 {fullname}
             </Text>
             <View style={styles.imgContainer}>
-            <TouchableOpacity >
-                <Image
-                    source={require("@assets/images/IMG_20250716_130532.jpg")}
-                    style={{ width: "100%", height: "100%" }}
-                    placeholder={{ blurhash }}
-                    contentFit="cover"
-                    transition={1000}
-                />
-            </TouchableOpacity>
+                <TouchableOpacity>
+                    <Image
+                        source={require("@assets/images/IMG_20250716_130532.jpg")}
+                        style={{ width: "100%", height: "100%" }}
+                        placeholder={{ blurhash }}
+                        contentFit="cover"
+                        transition={1000}
+                    />
+                    <BlurView
+                        intensity={80}
+                        tint="dark"
+                        style={styles.blurView}
+                    />
+                </TouchableOpacity>
             </View>
             <TouchableOpacity style={styles.editIcon}>
                 <MaterialCommunityIcons
@@ -86,6 +92,13 @@ const styles = StyleSheet.create({
         borderRadius: vw * 0.5,
         overflow: "hidden",
         borderColor: "white"
+    },
+    blurView: {
+        width: "100%",
+        height: "100%",
+        position: "absolute",
+        top: 0,
+        left: 0
     },
     editIcon: {
         position: "absolute",

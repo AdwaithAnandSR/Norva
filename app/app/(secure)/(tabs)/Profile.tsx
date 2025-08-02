@@ -23,14 +23,9 @@ const Profile = () => {
         <View overScrollMode={"always"} bounces={true} style={styles.container}>
             <LinearGradient
                 style={styles.linearBg}
-                colors={[
-                    "rgb(107,86,79)",
-                    "transparent",
-                    "transparent",
-                    "rgba(77,64,60,0.88)"
-                ]}
+                colors={["rgba(107,86,79, 0.4)", "transparent"]}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+                end={{ x: 0, y: 0.2 }}
             >
                 <View style={styles.navbar}></View>
                 <Text style={styles.username}>{username}</Text>
