@@ -2,11 +2,12 @@ import mongoose from "mongoose";
 import chalk from "chalk";
 
 try {
-    const uri = process.env.DB_URI;
+    const DB_PASSWORD = process.env.DB_PASSWORD;
+    const uri  = `mongodb+srv://norva:${DB_PASSWORD}@cluster0.8ayfqlk.mongodb.net/norva?appName=Cluster0`
 
-    if (!uri) {
+    if (!DB_PASSWORD) {
         throw new Error(
-            "Mongodb uri must not be undefined!\n ensure .env is loaded with DB_URI."
+            "Mongodb password must not be undefined!\n ensure .env is loaded with DB_PASSWORD."
         );
     } else {
         mongoose
@@ -16,7 +17,7 @@ try {
                     chalk.hex("#2ef8ad")(
                         `connected to database`
                     ),
-                    chalk.hex("#f82dbb")(`${mongoose.connection.name} 🔥`)
+                    chalk.hex("#f82dbb")(`${mongoose.connection.name} 🍂\n\n\n`)
                 );
             })
             .catch(err => {

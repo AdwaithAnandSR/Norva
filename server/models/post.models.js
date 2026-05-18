@@ -1,41 +1,84 @@
 import mongoose from "mongoose";
 
-const postSchema = mongoose.Schema(
+const postSchema = new mongoose.Schema(
     {
         title: {
             type: String,
-            required: true 
+            trim: true,
+            maxlength: 220
         },
-        description: String,
-        tags:[{
+
+        description: {
             type: String,
             trim: true,
-            lowercase: true
-        }],
+            maxlength: 3000
+        },
+
+        tags: [
+            {
+                type: String,
+                trim: true,
+                lowercase: true
+            }
+        ],
+
         userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "user",
-            required: true
+            required: true,
+            index: true
         },
+
         mediaType: {
             type: String,
-            enum: ["image", "video"]
+            enum: ["image", "video"],
+            required: true
         },
-        mediaUrl: {
+
+        url: {
             type: String,
             required: true
         },
+
+        mediaPublicId: {
+            type: String,
+            required: true
+        },
+
         likes: [
             {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: "user",
+                ref: "user"
             }
         ],
-        
+
+        likesCount: {
+            type: Number,
+            default: 0
+        },
+
+        commentsCount: {
+            type: Number,
+            default: 0
+        },
+
+        viewsCount: {
+            type: Number,
+            default: 0
+        },
+
+        isEdited: {
+            type: Boolean,
+            default: false
+        }
     },
-    { timestamp: true }
+    {
+        timestamps: true
+    }
 );
 
-// postSchema.index({ userId: 1, createdAt: -1 });
+postSchema.index({ userId: 1, createdAt: -1 });
+
+postSchema.index({ tags: 1 });
 
 export default mongoose.model("post", postSchema);

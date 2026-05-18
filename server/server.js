@@ -4,15 +4,15 @@ import cors from "cors";
 import chalk from "chalk";
 import { createServer } from "http";
 
-// file imports
 import { initIo } from "./services/socket.service.js";
 import "./config/db.config.js";
 import AuthRoutes from "./routes/auth.routes.js";
 import PostRoutes from "./routes/post.routes.js";
+import fileRoutes from "./routes/file.routes.js";
+import { isAuthenticated } from "./middleware/auth.js";
 
-// constants
 const app = express();
-const PORT = process.env.PORT || 5050;
+const PORT = process.env.PORT || 3000;
 
 const server = createServer(app);
 initIo(server);
@@ -25,7 +25,9 @@ app.use(
     })
 );
 app.use("/auth", AuthRoutes);
+app.use(isAuthenticated)
 app.use("/post", PostRoutes);
+app.use("/file", fileRoutes);
 
 server.listen(PORT, () =>
     console.log(chalk.hex("#2ef8ad")(`app started at port ${PORT} 🍄`))

@@ -1,0 +1,27 @@
+@import "tailwindcss";
+@import "uniwind";
+
+@layer theme {
+    :root {
+        @variant dark {
+            --color-primary: #030308; /* Void — deepest background */
+            --color-card: #0d0d1a; /* Nebula — card surface */
+            --color-card-selected: #1e1e38; /* Starfield — selected / hover */
+            --color-btn: #8B5CF6;
+            --color-text: #e8e8ff; /* Comet — main text */
+            --color-text-secondary: #c4c4e0; /* Stardust — secondary text */
+            --color-border: oklch(0.52 0.22 271 / 12%);
+        }
+
+        @variant light {
+            --color-primary: #030308; /* Void — deepest background */
+            --color-card: #0d0d1a; /* Nebula — card surface */
+            --color-card-selected: #1e1e38; /* Starfield — selected / hover */
+            --color-btn: #6c63ff; /* Pulsar — primary accent */
+            --color-text: #e8e8ff; /* Comet — main text */
+            --color-text-secondary: #c4c4e0; /* Stardust — secondary text */
+            --color-border: oklch(0.52 0.22 271 / 12%);
+        }
+
+    }
+}

@@ -23,14 +23,14 @@ const signIn = async (req, res) => {
         const user = await User.findOne({ username });
         if (!user)
             return res.status(404).json({
-                message: "INCORRECT_USERNAME",
+                message: "INCORRECT CREDENTIALS",
                 success: false
             });
 
         const isPassMatch = await bcrypt.compare(password, user.password);
         if (!isPassMatch)
             return res.status(400).json({
-                message: "INCORRECT_PASSWORD",
+                message: "INCORRECT CREDENTIALS",
                 success: false
             });
 
@@ -42,16 +42,18 @@ const signIn = async (req, res) => {
         if (!accessToken || !refreshToken)
             return res
                 .status(500)
-                .json({ message: "TOKEN_GEN_FAILED", success: false });
+                .json({ message: "FAILED TO GENERATE TOKEN", success: false });
 
-        user.password = undefined
+        const { password: _, ...userWithoutPassword } = user;
+        
+        console.log(userWithoutPassword)
 
         res.json({
             message: "SIGNIN_SUCCESS",
             success: true,
             accessToken,
             refreshToken,
-            user
+            user: userWithoutPassword._doc
         });
     } catch (err) {
         console.log(`Error while SignIn: ${err}`);
