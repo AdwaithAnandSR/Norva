@@ -45,12 +45,13 @@ const CreatePost = () => {
 
         tags = tags
             ?.toLowerCase()
-            .split(",")
+            ?.split(",")
             ?.map(i => i?.trim());
 
         let uploadedMedia = null;
 
         if (image) {
+            setMessage("Uploading media...");
             const uploadResult = await uploadToCloudinary(image);
 
             if (!uploadResult.success)
@@ -58,6 +59,8 @@ const CreatePost = () => {
 
             uploadedMedia = uploadResult;
         }
+
+        setMessage("Creating post, please wait..");
 
         const createRes = await createPost({
             title,
@@ -70,7 +73,8 @@ const CreatePost = () => {
             setImage(null);
             titleValue.current = "";
             descValue.current = "";
-            tagsValue.current = "";
+            tagsValue.current = ""
+            setMessage("Successfully created new post");
         } else setMessage("Failed to create post!");
     };
 

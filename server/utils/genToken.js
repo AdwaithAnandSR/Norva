@@ -4,9 +4,9 @@ import { v4 as uuid } from "uuid";
 
 import Token from "../models/token.model.js";
 
-export const genAccessToken = payload => {
-    return jwt.sign({ ...payload }, process.env.JWT_ACCESS_SECRET, {
-        expiresIn: "1m"
+export const genAccessToken = (payload, jti) => {
+    return jwt.sign({ ...payload, jti }, process.env.JWT_ACCESS_SECRET, {
+        expiresIn: "1h"
     });
 };
 
@@ -19,11 +19,14 @@ export const genRefreshToken = (payload, jti) => {
 export const genToken = async payload => {
     try {
         if (!payload || !payload.userId || !payload.role) {
-            return console.error("invalid payload for token generaing\npayload: ", payload);
-        };
+            return console.error(
+                "invalid payload for token generaing\npayload: ",
+                payload
+            );
+        }
 
         const jti = uuid();
-        const accessToken = genAccessToken(payload);
+        const accessToken = genAccessToken(payload, jti);
         const refreshToken = genRefreshToken(payload, jti);
 
         if (!accessToken || !refreshToken)

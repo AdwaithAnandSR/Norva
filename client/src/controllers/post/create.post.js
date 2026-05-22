@@ -1,10 +1,12 @@
+import axios from "../../utils/axios.js";
+
 export const createPost = async ({ title, description, tags, media }) => {
     try {
-        const { data } = await axios.post("/posts", {
+        const { data } = await axios.post("/post/create", {
             title,
             description,
             tags,
-            media
+            ...media
         });
 
         return true;

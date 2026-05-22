@@ -24,7 +24,7 @@ router.post("/create", async (req, res) => {
             mediaType,
             url,
             mediaPublicId,
-            userId: req.user._id
+            userId: req.user.userId
         });
 
         res.status(200).json({

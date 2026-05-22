@@ -5,24 +5,24 @@ export const uploadToCloudinary = async file => {
         const { data: signData } = await axios.post("/file/signature", {
             folder: "posts"
         });
-        
-        console.log(signData)
 
         const formData = new FormData();
 
         formData.append("file", {
-            uri: file.uri,
-            type: file.mimeType,
-            name: file.name || `upload.${file.uri.split(".").pop()}`
+            uri: file.assets[0].uri,
+            type: file.assets[0].mimeType,
+            name:
+                file.assets[0].name ||
+                `upload.${file.assets[0].uri.split(".").pop()}`
         });
 
-        formData.append("api_key", signData.apiKey);
-        formData.append("timestamp", signData.timestamp);
-        formData.append("signature", signData.signature);
-        formData.append("folder", signData.folder);
+        formData.append("api_key", signData.data.apiKey);
+        formData.append("timestamp", signData.data.timestamp);
+        formData.append("signature", signData.data.signature);
+        formData.append("folder", signData.data.folder);
 
         const response = await fetch(
-            `https://api.cloudinary.com/v1_1/${signData.cloudName}/auto/upload`,
+            `https://api.cloudinary.com/v1_1/${signData.data.cloudName}/auto/upload`,
             {
                 method: "POST",
                 body: formData

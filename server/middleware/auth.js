@@ -11,19 +11,16 @@ export const isAuthenticated = (req, res, next) => {
             });
         }
 
-        if (!authHeader.startsWith("Bearer ")) {
+        if (!authHeader.startsWith("Bearer ")) 
             return res.status(401).json({
                 success: false,
                 message: "INVALID_FORMAT"
             });
-        }
+        
 
         const token = authHeader.split(" ")[1];
-        
-        console.log("token ", token)
-
         const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-
+        
         const { userId, jti, role } = payload;
 
         if (!userId || !jti)
