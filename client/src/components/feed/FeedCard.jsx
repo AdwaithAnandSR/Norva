@@ -27,9 +27,8 @@ const { height: vh } = Dimensions.get("window");
 
 const PostCard = ({ post }) => {
     const currentUserId = useUser(state => state.userId);
-    const setCommentsCount = useComments(state => state.setCommentsCount);
-    const commentsCount = useComments(state => state.commentsCount);
     const onOpen = useComments(state => state.onOpen);
+    const setOnCommentAdded = useComments(state => state.setOnCommentAdded);
 
     const heartRef = useRef(null);
     const lastPress = useRef(0);
@@ -37,8 +36,11 @@ const PostCard = ({ post }) => {
     const navigating = useRef(false);
     const requestRef = useRef(false);
 
-    const [liked, setLiked] = useState(false);
+    const [liked, setLiked] = useState(
+        () => post.likes?.includes(currentUserId) ?? false
+    );
     const [likesCount, setLikesCount] = useState(post.likesCount ?? 0);
+    const [commentsCount, setCommentsCount] = useState(post.commentsCount ?? 0);
     const [likeLoading, setLikeLoading] = useState(false);
     const [ratio, setRatio] = useState(1);
 
@@ -61,6 +63,7 @@ const PostCard = ({ post }) => {
         try {
             const result = await setLike(post._id, nextLiked);
             if (postId !== post._id) return;
+
             setLiked(result.liked);
             setLikesCount(result.likesCount);
         } catch (e) {
@@ -106,14 +109,28 @@ const PostCard = ({ post }) => {
         lastPress.current = now;
     };
 
+    const handleOpenComments = () => {
+        setOnCommentAdded(() => {
+            setCommentsCount(c => c + 1);
+        });
+        onOpen(post._id);
+    };
+
     useEffect(() => {
-        setCommentsCount(post.commentsCount);
         return () => {
             if (singleTapTimeout.current) {
                 clearTimeout(singleTapTimeout.current);
             }
         };
     }, []);
+    
+    useEffect(() => {
+        if (!requestRef.current) {
+            setLiked(post.likes?.includes(currentUserId) ?? false);
+            setLikesCount(post.likesCount ?? 0);
+        }
+        setCommentsCount(post.commentsCount ?? 0);
+    }, [post._id, post.likesCount, post.commentsCount]);
 
     useEffect(() => {
         if (post.url) {
@@ -122,12 +139,6 @@ const PostCard = ({ post }) => {
             });
         }
     }, [post.url]);
-
-    useEffect(() => {
-        setLiked(post.likes?.includes(currentUserId) ?? false);
-        setLikesCount(post.likesCount ?? 0);
-        setCommentsCount(post.commentsCount ?? 0);
-    }, [post._id]);
 
     return (
         <View
@@ -257,7 +268,7 @@ const PostCard = ({ post }) => {
                 {/* ④ comment button now opens the sheet */}
                 <TouchableOpacity
                     className="flex-row items-center gap-1"
-                    onPress={() => onOpen(post._id)}
+                    onPress={handleOpenComments}
                     activeOpacity={0.7}
                 >
                     <Feather name="message-circle" size={20} color="#c4c4e0" />

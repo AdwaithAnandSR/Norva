@@ -37,12 +37,29 @@ export const useCommentSubmit = ({
                 newComment
             });
 
+            if (!replyingTo) {
+                qc.setQueryData(["feed"], old => {
+                    if (!old?.pages) return old;
+                    return {
+                        ...old,
+                        pages: old.pages.map(page => ({
+                            ...page,
+                            posts: page.posts.map(p =>
+                                p._id === postId
+                                    ? {
+                                          ...p,
+                                          commentsCount: p.commentsCount + 1
+                                      }
+                                    : p
+                            )
+                        }))
+                    };
+                });
+            }
+
             resetInput();
-
             Keyboard.dismiss();
-
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
             onCommentAdded?.();
         }
     });

@@ -137,21 +137,22 @@ const Home = () => {
                 ListFooterComponent={ListFooter}
                 ListEmptyComponent={ListEmpty}
                 ListHeaderComponent={
-                    isRefetching && !isFetchingNextPage && <Loader />
+                    isRefetching && !isFetchingNextPage ? <Loader /> : null
                 }
                 className="pt-24"
                 contentContainerStyle={{
                     paddingBottom: 200
                 }}
+                refreshing={isRefetching}
                 onRefresh={refetch}
                 showsVerticalScrollIndicator={false}
             />
             <CommentSheet
-                // postId={post._id}
-                // commentsCount={commentsCount}
-                // visible={showComments}
-                // onClose={() => setShowComments(false)}
-                // onCommentAdded={handleCommentAdded}
+            // postId={post._id}
+            // commentsCount={commentsCount}
+            // visible={showComments}
+            // onClose={() => setShowComments(false)}
+            // onCommentAdded={handleCommentAdded}
             />
         </View>
     );

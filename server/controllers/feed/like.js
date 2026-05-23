@@ -20,7 +20,8 @@ export const like = async (req, res) => {
             return res.status(200).json({
                 success: true,
                 liked: true,
-                likesCount: post.likesCount
+                likesCount: post.likesCount,
+                alreadyInState: true
             });
         }
 
@@ -63,7 +64,8 @@ export const dislike = async (req, res) => {
             return res.status(200).json({
                 success: true,
                 liked: false,
-                likesCount: post.likesCount
+                likesCount: post.likesCount,
+                alreadyInState: true
             });
         }
 

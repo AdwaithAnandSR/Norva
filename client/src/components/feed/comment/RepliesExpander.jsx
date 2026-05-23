@@ -6,7 +6,7 @@ import Loader from "../../common/Loader.tsx";
 
 import { useRepliesQuery } from "../../../hooks/useRepliesQuery.js";
 
-const RepliesExpander = ({ comment }) => {
+const RepliesExpander = ({ comment, onReply }) => {
     const [open, setOpen] = useState(false);
 
     const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -31,7 +31,7 @@ const RepliesExpander = ({ comment }) => {
                 <Loader size="small" />
             ) : (
                 replies.map(reply => (
-                    <CommentCard key={reply._id} comment={reply} isReply />
+                    <CommentCard key={reply._id} comment={reply} isReply onReply={onReply} />
                 ))
             )}
 
