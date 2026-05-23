@@ -1,32 +1,40 @@
-import { View, Text, TouchableOpacity, Dimensions, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
-const { height: vh, width: vw } = Dimensions.get("window");
+const Stat = ({ value, label, onPress }) => (
+    <TouchableOpacity onPress={onPress} style={{ alignItems: "center" }}>
+        <Text style={[styles.text, { color: "#fff", fontSize: 20, fontWeight: "bold" }]}>
+            {value ?? 0}
+        </Text>
+        <Text style={[styles.text, { color: "rgba(255,255,255,0.5)", fontSize: 13 }]}>
+            {label}
+        </Text>
+    </TouchableOpacity>
+);
 
-const ProfileActivityView = () => {
+const ProfileActivityView = ({ postsCount, followingCount, followersCount }) => {
     return (
-        <View className="flex-row items-center gap-12 justify-start py-5 px-5">
-            <TouchableOpacity>
-                <Text style={styles.text} className="text-text text-xl font-bold">100</Text>
-                <Text style={styles.text} className="text-text/60 text-md">Posts</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-                style={[{ borderRightWidth: 2, borderLeftWidth: 2 }]}
-            >
-                <Text style={styles.text} className="text-text text-xl font-bold">100</Text>
-                <Text style={styles.text} className="text-text/60 text-md">Following</Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-                <Text style={styles.text} className="text-text text-xl font-bold">100</Text>
-                <Text style={styles.text} className="text-text/60 text-md">Followers</Text>
-            </TouchableOpacity>
+        <View
+            style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-around",
+                paddingVertical: 20,
+                paddingHorizontal: 20,
+                borderBottomWidth: 1,
+                borderColor: "rgba(255,255,255,0.06)"
+            }}
+        >
+            <Stat value={postsCount}     label="Posts"     />
+            <View style={{ width: 1, height: 32, backgroundColor: "rgba(255,255,255,0.08)" }} />
+            <Stat value={followingCount} label="Following"  />
+            <View style={{ width: 1, height: 32, backgroundColor: "rgba(255,255,255,0.08)" }} />
+            <Stat value={followersCount} label="Followers"  />
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    text: {
-        fontFamily: "SpaceMono"
-    }
-})
+    text: { fontFamily: "SpaceMono" }
+});
 
 export default ProfileActivityView;
