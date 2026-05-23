@@ -16,15 +16,8 @@ const handleSignUp = async (data, page, setMessage) => {
     try {
         handleMessage("please wait...");
 
-        if (data.username.trim().length < 6)
-            return handleMessage("username must contain atleast 5 characters!");
-        else if (data.password.trim().length < 8)
-            return handleMessage("password must contain atleast 8 characters!");
-        else if (page === "signup" && data.fullname.trim().length === 0)
-            return handleMessage("enter fullname!");
-
         const res = await axios.post(`/auth/${page}`, data);
-
+        
         const { user, refreshToken, accessToken } = res.data;
 
         storeSession({
@@ -51,11 +44,3 @@ const handleSignUp = async (data, page, setMessage) => {
 };
 
 export default handleSignUp;
-
-export const checkAuth = async () => {
-    try {
-        const { data } = await axios.get("/me");
-    } catch (e) {
-        console.log(e);
-    }
-};

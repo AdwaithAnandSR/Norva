@@ -4,7 +4,7 @@ import { View, TouchableOpacity, Text } from "react-native";
 import CommentCard from "./CommentCard.jsx";
 import Loader from "../../common/Loader.tsx";
 
-import { useRepliesQuery } from "../../../hooks/useRepliesQuery.js";
+import { useRepliesQuery } from "../../../hooks/comment/useRepliesQuery.js";
 
 const RepliesExpander = ({ comment, onReply }) => {
     const [open, setOpen] = useState(false);

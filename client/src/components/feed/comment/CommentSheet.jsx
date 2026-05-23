@@ -9,9 +9,9 @@ import SheetBackdrop from "./SheetBackdrop.jsx";
 
 import { useComments } from "../../../store/comment.store.js";
 
-import { useCommentSheetAnimation } from "../../../hooks/useCommentSheetAnimation.js";
-import { useCommentsQuery } from "../../../hooks/useCommentQuery.js";
-import { useCommentSubmit } from "../../../hooks/useCommentSubmit.js";
+import { useCommentSheetAnimation } from "../../../hooks/comment/useCommentSheetAnimation.js";
+import { useCommentsQuery } from "../../../hooks/comment/useCommentQuery.js";
+import { useCommentSubmit } from "../../../hooks/comment/useCommentSubmit.js";
 
 const CommentSheet = () => {
     const visible = useComments(state => state.visible);

@@ -1,11 +1,22 @@
 import api from "../../utils/axios.js";
 
-/**
- * Fetches a page of feed posts.
- * @param {object|null} cursor - { createdAt, _id } of last seen post, or null for first page
- * @param {number} limit
- * @returns {{ posts, nextCursor, hasMore }}
- */
+export const createPost = async ({ title, description, tags, media }) => {
+    try {
+        const { data } = await api.post("/post/create", {
+            title,
+            description,
+            tags,
+            ...media
+        });
+
+        return true;
+    } catch (error) {
+        console.log(error);
+
+        return false;
+    }
+};
+
 export const fetchFeed = async ({ cursor = null, limit = 10 } = {}) => {
     const { data } = await api.post("/post/getFeed", {
         cursor,
@@ -14,14 +25,24 @@ export const fetchFeed = async ({ cursor = null, limit = 10 } = {}) => {
     return data; // { success, posts, nextCursor, hasMore }
 };
 
-/**
- * Toggle like on a post.
- * @param {string} postId
- * @returns {{ liked: boolean, likesCount: number }}
- */
-export const toggleLike = async postId => {
-    const { data } = await api.post(`/post/like/${postId}`);
-    return data;
+export const deletePost = async postId => {
+    const { data } = await api.delete(`/post/${postId}`);
+    
+    console.log("data ", data)
+    return data; // { success }
+};
+
+export const editPost = async (postId, { title, description, tags }) => {
+    const { data } = await api.patch(`/post/${postId}`, {
+        title,
+        description,
+        tags
+    });
+    return data; // { success, post }
+};
+
+export const incrementView = async postId => {
+    await api.post(`/post/${postId}/view`);
 };
 
 export const setLike = async (postId, shouldLike) => {

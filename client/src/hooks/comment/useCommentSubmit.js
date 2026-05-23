@@ -2,8 +2,8 @@ import { Keyboard } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 
-import { createComment } from "../controllers/post/comment.controller.js";
-import { optimisticCommentUpdate } from "../utils/feed/optimisticCommentUpdate.js";
+import { createComment } from "../../controllers/post/comment.controller.js";
+import { optimisticCommentUpdate } from "../../utils/feed/optimisticCommentUpdate.js";
 
 export const useCommentSubmit = ({
     postId,

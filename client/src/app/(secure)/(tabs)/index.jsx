@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { View, Text } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -8,6 +9,7 @@ import Loader from "../../../components/common/Loader";
 import PostCard from "../../../components/feed/FeedCard.jsx";
 import CommentSheet from "../../../components/feed/comment//CommentSheet.jsx";
 
+import { incrementView } from "../../../controllers/post/feed.controller.js";
 import { fetchFeed } from "../../../controllers/post/feed.controller.js";
 
 const LIMIT = 10;
@@ -86,6 +88,7 @@ const Home = () => {
     } = useFeed();
 
     const posts = data?.pages.flatMap(p => p.posts) ?? [];
+    const viewedPosts = useRef(new Set());
 
     const ListFooter = isFetchingNextPage ? <Spinner /> : null;
 
@@ -98,6 +101,20 @@ const Home = () => {
     ) : (
         <EmptyFeed />
     );
+
+    const viewabilityConfig = useRef({
+        itemVisiblePercentThreshold: 50,
+        minimumViewTime: 1000
+    }).current;
+
+    const onViewableItemsChanged = ({ viewableItems }) => {
+        viewableItems.forEach(({ item }) => {
+            if (!viewedPosts.current.has(item._id)) {
+                viewedPosts.current.add(item._id);
+                incrementView(item._id).catch(() => {});
+            }
+        });
+    };
 
     return (
         <View className="flex-1 bg-primary">
@@ -146,14 +163,10 @@ const Home = () => {
                 refreshing={isRefetching}
                 onRefresh={refetch}
                 showsVerticalScrollIndicator={false}
+                onViewableItemsChanged={onViewableItemsChanged}
+                viewabilityConfig={viewabilityConfig}
             />
-            <CommentSheet
-            // postId={post._id}
-            // commentsCount={commentsCount}
-            // visible={showComments}
-            // onClose={() => setShowComments(false)}
-            // onCommentAdded={handleCommentAdded}
-            />
+            <CommentSheet />
         </View>
     );
 };

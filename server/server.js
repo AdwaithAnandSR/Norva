@@ -6,9 +6,12 @@ import { createServer } from "http";
 
 import { initIo } from "./services/socket.service.js";
 import "./config/db.config.js";
+
 import AuthRoutes from "./routes/auth.routes.js";
 import PostRoutes from "./routes/post.routes.js";
-import fileRoutes from "./routes/file.routes.js";
+import FileRoutes from "./routes/file.routes.js";
+import UserRoutes from "./routes/user.routes.js";
+
 import { isAuthenticated } from "./middleware/auth.js";
 
 const app = express();
@@ -27,7 +30,8 @@ app.use(
 app.use("/auth", AuthRoutes);
 app.use(isAuthenticated)
 app.use("/post", PostRoutes);
-app.use("/file", fileRoutes);
+app.use("/file", FileRoutes);
+app.use("/user", UserRoutes);
 
 server.listen(PORT, () =>
     console.log(chalk.hex("#2ef8ad")(`app started at port ${PORT} 🍄`))

@@ -12,7 +12,7 @@ const signIn = async (req, res) => {
         if (
             !username ||
             !password ||
-            username.trim().length < 5 ||
+            username.trim().length < 4 ||
             password.trim().length < 5
         ) {
             return res
@@ -42,18 +42,18 @@ const signIn = async (req, res) => {
         if (!accessToken || !refreshToken)
             return res
                 .status(500)
-                .json({ message: "FAILED TO GENERATE TOKEN", success: false });
-
-        const { password: _, ...userWithoutPassword } = user;
+                .json({ message: "FAILED TO_GENERATE_TOKEN", success: false });
         
-        console.log(userWithoutPassword)
+        const userObj = user.toObject();
+
+        const { password: _, ...userWithoutPassword } = userObj;
 
         res.json({
             message: "SIGNIN_SUCCESS",
             success: true,
             accessToken,
             refreshToken,
-            user: userWithoutPassword._doc
+            user: userWithoutPassword
         });
     } catch (err) {
         console.log(`Error while SignIn: ${err}`);

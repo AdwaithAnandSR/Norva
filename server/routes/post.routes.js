@@ -6,7 +6,13 @@ import User from "../models/user.models.js";
 import Post from "../models/post.models.js";
 
 import { like, dislike } from "../controllers/feed/like.js";
-import { createFeed, getFeed } from "../controllers/feed/feed.js";
+import {
+    createFeed,
+    getFeed,
+    deletePost,
+    editPost,
+    incrementViews
+} from "../controllers/feed/feed.js";
 import {
     getComments,
     comment,
@@ -14,9 +20,11 @@ import {
     replies
 } from "../controllers/feed/comment.js";
 
-router.post("/getFeed", getFeed);
-
 router.post("/create", createFeed);
+router.post("/getFeed", getFeed);
+router.delete("/:id", deletePost);
+router.patch("/:id", editPost);
+router.post("/:id/view", incrementViews);
 
 router.post("/like/:id", like);
 

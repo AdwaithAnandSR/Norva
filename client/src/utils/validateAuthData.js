@@ -32,7 +32,7 @@ export const isValidUsername = (input, setMessage) => {
     }
 
     // Minimum length check
-    if (normalized.length < 5) {
+    if (normalized.length < 5){
         setMessage(prev => ({
             ...prev,
             username: `Usernames must be at least 5 characters long. (${normalized.length}/5)`

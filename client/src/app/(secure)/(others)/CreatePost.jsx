@@ -10,7 +10,7 @@ import {
 import { buttonGlow, orangeGlow } from "@constants/style.js";
 import { pickImage } from "../../../utils/imagePick.js";
 import { uploadToCloudinary } from "../../../utils/cloudinary.js";
-import { createPost } from "../../../controllers/post/create.post.js";
+import { createPost } from "../../../controllers/post/feed.controller.js";
 
 import {
     Preview as ImagePreview,

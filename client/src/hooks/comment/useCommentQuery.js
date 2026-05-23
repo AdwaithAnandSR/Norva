@@ -1,14 +1,14 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-import { fetchReplies } from "../controllers/post/comment.controller.js";
+import { fetchComments } from "../../controllers/post/comment.controller.js";
 
-export const useRepliesQuery = (commentId, enabled) => {
+export const useCommentsQuery = (postId, enabled) => {
     return useInfiniteQuery({
-        queryKey: ["replies", commentId],
+        queryKey: ["comments", postId],
 
         queryFn: ({ pageParam }) =>
-            fetchReplies({
-                commentId,
+            fetchComments({
+                postId,
                 cursor: pageParam
             }),
 
