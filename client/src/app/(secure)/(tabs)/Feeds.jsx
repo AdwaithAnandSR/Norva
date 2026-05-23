@@ -1,10 +1,9 @@
-
 import React from "react";
-import { View, Text, Image, StyleSheet, SafeAreaView } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 
 export default function App() {
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             {/* Top Text (Over the image) */}
             <View style={styles.overlay}>
                 <Text style={styles.textTop}>This is top text</Text>
@@ -12,14 +11,16 @@ export default function App() {
 
             {/* Image */}
             <Image
-                source={{ uri: "https://images.media.io/images2023/photo-enhance/banner-after.png" }}
+                source={{
+                    uri: "https://images.media.io/images2023/photo-enhance/banner-after.png"
+                }}
                 style={styles.image}
                 resizeMode="cover"
             />
 
             {/* Bottom Text (Below the image) */}
             <Text style={styles.textBottom}>This is bottom text</Text>
-        </SafeAreaView>
+        </View>
     );
 }
 

@@ -36,6 +36,13 @@ const Layout = () => {
             <Stack.Protected guard={isLoggedIn}>
                 <Stack.Screen name="(secure)/(tabs)" />
                 <Stack.Screen name="(secure)/(others)" />
+                <Stack.Screen
+                    options={{
+                        animation: "fade",
+                        presentation: "transparentModal"
+                    }}
+                    name="(secure)/(models)"
+                />
             </Stack.Protected>
         </Stack>
     );

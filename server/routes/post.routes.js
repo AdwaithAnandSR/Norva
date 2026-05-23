@@ -5,137 +5,29 @@ const router = express.Router();
 import User from "../models/user.models.js";
 import Post from "../models/post.models.js";
 
-/**
-* GET /post/getFeed
-* Cursor-based infinite feed. Cursor = { createdAt, _id } of the last seen post.
-* Returns posts sorted newest-first with author info populated.
-*/
-router.post("/getFeed", async (req, res) => {
-    try {
-        const {
-            cursor, limit = 10
-        } = req.body;
+import { like, dislike } from "../controllers/feed/like.js";
+import { createFeed, getFeed } from "../controllers/feed/feed.js";
+import {
+    getComments,
+    comment,
+    likeComment,
+    replies
+} from "../controllers/feed/comment.js";
 
-        // Build the cursor query — page backwards through time
-        const query = cursor
-        ? {
-            $or: [{
-                createdAt: {
-                    $lt: new Date(cursor.createdAt)
-                }
-            },
-                // tie-break on _id so we never miss posts created in the same ms
-                {
-                    createdAt: new Date(cursor.createdAt),
-                    _id: {
-                        $lt: cursor._id
-                    }
-                }]
-        }: {};
+router.post("/getFeed", getFeed);
 
-        // Fetch one extra to know if there's a next page
-        const posts = await Post.find(query)
-        .sort({
-            createdAt: -1, _id: -1
-        })
-        .limit(Number(limit) + 1)
-        .populate("userId", "username fullname")
-        .lean();
+router.post("/create", createFeed);
 
-        const hasMore = posts.length > Number(limit);
-        if (hasMore) posts.pop();
+router.post("/like/:id", like);
 
-        const nextCursor = hasMore
-        ? {
-            createdAt: posts[posts.length - 1].createdAt,
-            _id: posts[posts.length - 1]._id
-        }: null;
+router.delete("/like/:id", dislike);
 
-        return res.status(200).json({
-            success: true,
-            posts,
-            nextCursor,
-            hasMore
-        });
-    } catch (error) {
-        console.error("Error fetching feed:", error);
-        return res.status(500).json({
-            success: false, message: "SERVER_ERROR"
-        });
-    }
-});
+router.get("/:postId/comments", getComments);
 
-/**
-* POST /post/like/:id  —  toggle like on a post
-*/
-router.post("/like/:id", async (req, res) => {
-    try {
-        const {
-            id
-        } = req.params;
-        const userId = req.user.userId;
+router.post("/:postId/comments", comment);
 
-        const post = await Post.findById(id);
-        if (!post) return res.status(404).json({
-            success: false
-        });
+router.post("/comment/:commentId/like", likeComment);
 
-        const alreadyLiked = post.likes.includes(userId);
-
-        if (alreadyLiked) {
-            post.likes.pull(userId);
-            post.likesCount = Math.max(0, post.likesCount - 1);
-        } else {
-            post.likes.addToSet(userId);
-            post.likesCount += 1;
-        }
-
-        await post.save();
-
-        return res.status(200).json({
-            success: true,
-            liked: !alreadyLiked,
-            likesCount: post.likesCount
-        });
-    } catch (error) {
-        console.error("Error toggling like:", error);
-        return res.status(500).json({
-            success: false
-        });
-    }
-});
-
-router.post("/create", async (req, res) => {
-    try {
-        const {
-            title,
-            description,
-            tags,
-            mediaType,
-            url,
-            mediaPublicId
-        } =
-        req.body;
-
-        const post = await Post.create({
-            title,
-            description,
-            tags,
-            mediaType,
-            url,
-            mediaPublicId,
-            userId: req.user.userId
-        });
-
-        res.status(200).json({
-            success: true, post
-        });
-    } catch (error) {
-        console.error("Error while creating post:", error);
-        res.status(500).json({
-            success: false
-        });
-    }
-});
+router.get("/comment/:commentId/replies", replies);
 
 export default router;

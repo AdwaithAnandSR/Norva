@@ -1,6 +1,7 @@
+import ORGAxios from "axios";
 import axios from "../utils/axios";
 
-export const uploadToCloudinary = async file => {
+export const uploadToCloudinary = async (file, onProgress) => {
     try {
         const { data: signData } = await axios.post("/file/signature", {
             folder: "posts"
@@ -21,15 +22,23 @@ export const uploadToCloudinary = async file => {
         formData.append("signature", signData.data.signature);
         formData.append("folder", signData.data.folder);
 
-        const response = await fetch(
+        const { data } = await ORGAxios.post(
             `https://api.cloudinary.com/v1_1/${signData.data.cloudName}/auto/upload`,
+            formData,
             {
-                method: "POST",
-                body: formData
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                },
+
+                onUploadProgress: progressEvent => {
+                    const percent = Math.round(
+                        (progressEvent.loaded * 100) / progressEvent.total
+                    );
+
+                    onProgress?.(percent);
+                }
             }
         );
-
-        const data = await response.json();
 
         return {
             success: true,
@@ -39,6 +48,7 @@ export const uploadToCloudinary = async file => {
         };
     } catch (error) {
         console.log(error);
+        console.log(error?.response?.data);
 
         return {
             success: false,

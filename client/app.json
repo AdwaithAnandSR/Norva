@@ -16,7 +16,8 @@
                 "foregroundImage": "./assets/images/adaptive-icon.png",
                 "backgroundColor": "#ffffff"
             },
-            "package": "com.adwaithananddev.Norva"
+            "package": "com.adwaithananddev.Norva",
+            "predictiveBackGestureEnabled": true
         },
         "web": {
             "bundler": "metro",

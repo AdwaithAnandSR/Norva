@@ -1,25 +1,26 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import {
     View,
     Text,
     TouchableOpacity,
-    Dimensions,
-    TextInput
+    TextInput,
+    ScrollView
 } from "react-native";
-import { Image } from "expo-image";
 
 import { buttonGlow, orangeGlow } from "@constants/style.js";
 import { pickImage } from "../../../utils/imagePick.js";
 import { uploadToCloudinary } from "../../../utils/cloudinary.js";
 import { createPost } from "../../../controllers/post/create.post.js";
 
-const blurhash = "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azay";
-
-const { height: vh } = Dimensions.get("window");
+import {
+    Preview as ImagePreview,
+    Header
+} from "../../../components/feed/CreatePost.jsx";
 
 const CreatePost = () => {
     const [image, setImage] = useState(null);
     const [message, setMessage] = useState("");
+    const [uploadProgress, setUploadProgress] = useState(-1);
 
     const descRef = useRef(null);
     const tagsRef = useRef(null);
@@ -34,6 +35,7 @@ const CreatePost = () => {
 
     const handleCreatePost = async () => {
         setMessage("Creating post, please wait..");
+        setUploadProgress(0)
         const title = titleValue?.current,
             description = descValue?.current;
         let tags = tagsValue?.current;
@@ -52,10 +54,14 @@ const CreatePost = () => {
 
         if (image) {
             setMessage("Uploading media...");
-            const uploadResult = await uploadToCloudinary(image);
+            const uploadResult = await uploadToCloudinary(image, p =>
+                setUploadProgress(p)
+            );
 
-            if (!uploadResult.success)
+            if (!uploadResult.success) {
+                setUploadProgress(-1);
                 return setMessage("Failed to upload media");
+            }
 
             uploadedMedia = uploadResult;
         }
@@ -73,23 +79,22 @@ const CreatePost = () => {
             setImage(null);
             titleValue.current = "";
             descValue.current = "";
-            tagsValue.current = ""
+            tagsValue.current = "";
             setMessage("Successfully created new post");
         } else setMessage("Failed to create post!");
+
+        setUploadProgress(-1);
     };
 
     return (
-        <View className="bg-primary flex-1 top-0">
-            <View className="flex-row items-center justify-between px-3 pt-12">
-                <TouchableOpacity onPress={() => setCreatingPost(false)}>
-                    <Text className="font-black text-2xl text-text">Back</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleCreatePost}>
-                    <Text className="font-black text-2xl text-text">
-                        Create
-                    </Text>
-                </TouchableOpacity>
-            </View>
+        <ScrollView
+            className="bg-primary"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ flexGrow: 1, paddingBottom: 25 }}
+        >
+            <Header
+                handleCreatePost={handleCreatePost}
+            />
 
             <View className="gap-3 mt-10 px-2">
                 {message && (
@@ -97,6 +102,7 @@ const CreatePost = () => {
                         className={`font-bold text-md text-center ${message.toLowerCase().includes("failed") ? "text-red-500" : "text-text-secondary"} `}
                     >
                         {message}
+                        {uploadProgress > 0 && " (" + uploadProgress + "%)"}
                     </Text>
                 )}
                 <TextInput
@@ -138,20 +144,13 @@ const CreatePost = () => {
                 </TouchableOpacity>
 
                 {image && (
-                    <Image
-                        source={{ uri: image?.assets?.[0]?.uri }}
-                        style={{
-                            width: "100%",
-                            height: 300,
-                            borderRadius: 20
-                        }}
-                        className="border border-border"
-                        placeholder={{ blurhash }}
-                        contentFit="cover"
+                    <ImagePreview
+                        uri={image?.assets?.[0]?.uri}
+                        uploadProgress={uploadProgress}
                     />
                 )}
             </View>
-        </View>
+        </ScrollView>
     );
 };
 export default CreatePost;

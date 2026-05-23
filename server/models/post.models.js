@@ -31,18 +31,15 @@ const postSchema = new mongoose.Schema(
 
         mediaType: {
             type: String,
-            enum: ["image", "video"],
-            required: true
+            enum: ["image", "video"]
         },
 
         url: {
-            type: String,
-            required: true
+            type: String
         },
 
         mediaPublicId: {
-            type: String,
-            required: true
+            type: String
         },
 
         likes: [
