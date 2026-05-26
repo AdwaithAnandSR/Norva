@@ -4,6 +4,8 @@ export const followUser = async (req, res) => {
     try {
         const targetId = req.params.id;
         const myId = req.user.userId;
+        
+        console.log(targetId, myId)
 
         if (targetId === myId)
             return res

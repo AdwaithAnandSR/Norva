@@ -11,12 +11,12 @@ import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 
 import { useUser } from "../../../store/user.store.js";
-import { useMyProfile, useMyPosts } from "../../../hooks/useProfileQuery.js";
+import { useMyProfile, useMyPosts } from "../../../hooks/user/useProfileQuery.js";
 
 import ProfileImageView from "../../../components/profile/ProfileImageView.jsx";
 import ProfileActivityView from "../../../components/profile/ProfileActivityView.jsx";
 import QuickButtons from "../../../components/profile/QuickButtons.jsx";
-import PostsGrid from "../../../components/profile/PostsGrid.jsx";
+import PostsGrid from "../../../components/profile/PostGrid.jsx";
 
 const Profile = () => {
     const updateStats = useUser(state => state.updateStats);

@@ -1,6 +1,7 @@
 import api from "../../utils/axios.js";
 
 export const followUser = async userId => {
+    alert(userId)
     const { data } = await api.post(`/user/${userId}/follow`);
     return data; // { success, isFollowing, followersCount }
 };
