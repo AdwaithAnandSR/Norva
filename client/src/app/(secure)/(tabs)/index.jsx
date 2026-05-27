@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { View, Text } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -11,6 +11,8 @@ import CommentSheet from "../../../components/feed/comment//CommentSheet.jsx";
 
 import { incrementView } from "../../../controllers/post/feed.controller.js";
 import { fetchFeed } from "../../../controllers/post/feed.controller.js";
+
+import { useFollowStore } from "../../../store/follow.store.js";
 
 const LIMIT = 10;
 
@@ -86,6 +88,8 @@ const Home = () => {
         refetch,
         isRefetching
     } = useFeed();
+    
+    const seedFromPosts = useFollowStore(s => s.seedFromPosts);
 
     const posts = data?.pages.flatMap(p => p.posts) ?? [];
     const viewedPosts = useRef(new Set());
@@ -114,8 +118,12 @@ const Home = () => {
                 incrementView(item._id).catch(() => {});
             }
         });
-    };
+    }
 
+    useEffect(() => {
+        if (posts.length) seedFromPosts(posts);
+    }, [posts]);
+    
     return (
         <View className="flex-1 bg-primary">
             {/* Top gradient bleed behind the floating header */}

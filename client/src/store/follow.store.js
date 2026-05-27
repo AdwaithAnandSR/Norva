@@ -1,11 +1,14 @@
 import { create } from "zustand";
 
 export const useFollowStore = create(set => ({
-    // { [userId]: boolean }
     states: {},
+    pending: {},
 
     setFollowing: (userId, isFollowing) =>
         set(s => ({ states: { ...s.states, [userId]: isFollowing } })),
+
+    setPending: (userId, val) =>
+        set(s => ({ pending: { ...s.pending, [userId]: val } })),
 
     seedFromPosts: posts =>
         set(s => {

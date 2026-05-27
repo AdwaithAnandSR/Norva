@@ -4,23 +4,20 @@ export const followUser = async (req, res) => {
     try {
         const targetId = req.params.id;
         const myId = req.user.userId;
-        
-        console.log(targetId, myId)
 
         if (targetId === myId)
-            return res
-                .status(400)
-                .json({ success: false, message: "CANNOT_FOLLOW_SELF" });
+            return res.status(400).json({ success: false, message: "CANNOT_FOLLOW_SELF" });
 
         const [me, target] = await Promise.all([
             User.findById(myId),
             User.findById(targetId)
         ]);
 
+        if (!me)
+            return res.status(404).json({ success: false, message: "USER_NOT_FOUND" });
+
         if (!target)
-            return res
-                .status(404)
-                .json({ success: false, message: "USER_NOT_FOUND" });
+            return res.status(404).json({ success: false, message: "USER_NOT_FOUND" });
 
         const alreadyFollowing = me.following.includes(targetId);
         if (alreadyFollowing)
@@ -59,10 +56,11 @@ export const unfollowUser = async (req, res) => {
             User.findById(targetId)
         ]);
 
+        if (!me)
+            return res.status(404).json({ success: false, message: "USER_NOT_FOUND" });
+
         if (!target)
-            return res
-                .status(404)
-                .json({ success: false, message: "USER_NOT_FOUND" });
+            return res.status(404).json({ success: false, message: "USER_NOT_FOUND" });
 
         me.following.pull(targetId);
         me.followingCount = me.following.length;
@@ -82,4 +80,3 @@ export const unfollowUser = async (req, res) => {
         return res.status(500).json({ success: false });
     }
 };
-
