@@ -4,7 +4,7 @@ import { storage, storeSession, revokeSession } from "../storage/storage.js";
 
 import { useUser } from "../store/user.store.js";
 
-const API_URL = "http://localhost:3000";
+const API_URL = "http://192.168.87.7:3000";
 
 const api = axios.create({
     baseURL: API_URL,
