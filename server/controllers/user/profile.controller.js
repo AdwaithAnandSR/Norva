@@ -13,7 +13,9 @@ export const getMyProfile = async (req, res) => {
         ]);
 
         if (!user)
-            return res.status(404).json({ success: false, message: "USER_NOT_FOUND" });
+            return res
+                .status(404)
+                .json({ success: false, message: "USER_NOT_FOUND" });
 
         return res.status(200).json({
             success: true,
@@ -58,7 +60,9 @@ export const getUserPosts = async (req, res) => {
             ? { createdAt: posts.at(-1).createdAt, _id: posts.at(-1)._id }
             : null;
 
-        return res.status(200).json({ success: true, posts, nextCursor, hasMore });
+        return res
+            .status(200)
+            .json({ success: true, posts, nextCursor, hasMore });
     } catch (error) {
         console.error("getUserPosts error:", error);
         return res.status(500).json({ success: false });
@@ -71,7 +75,9 @@ export const updateProfile = async (req, res) => {
         const { fullname, username } = req.body;
 
         if (!fullname?.trim() && !username?.trim())
-            return res.status(400).json({ success: false, message: "NOTHING_TO_UPDATE" });
+            return res
+                .status(400)
+                .json({ success: false, message: "NOTHING_TO_UPDATE" });
 
         // Check username taken
         if (username) {
@@ -80,7 +86,9 @@ export const updateProfile = async (req, res) => {
                 _id: { $ne: myId }
             });
             if (taken)
-                return res.status(409).json({ success: false, message: "USERNAME_TAKEN" });
+                return res
+                    .status(409)
+                    .json({ success: false, message: "USERNAME_TAKEN" });
         }
 
         const user = await User.findById(myId);
@@ -94,6 +102,39 @@ export const updateProfile = async (req, res) => {
         });
     } catch (error) {
         console.error("updateProfile error:", error);
+        return res.status(500).json({ success: false });
+    }
+};
+
+export const getUserProfile = async (req, res) => {
+    try {
+        const targetId = req.params.id;
+        const myId = req.user.userId;
+
+        const [user, postsCount] = await Promise.all([
+            User.findById(targetId)
+                .select(
+                    "fullname username followersCount followingCount followers"
+                )
+                .lean(),
+            Post.countDocuments({ userId: targetId })
+        ]);
+
+        if (!user)
+            return res
+                .status(404)
+                .json({ success: false, message: "USER_NOT_FOUND" });
+
+        return res.status(200).json({
+            success: true,
+            user: {
+                ...user,
+                postsCount,
+                isFollowing: user.followers?.some(id => id.toString() === myId)
+            }
+        });
+    } catch (error) {
+        console.error("getUserProfile error:", error);
         return res.status(500).json({ success: false });
     }
 };

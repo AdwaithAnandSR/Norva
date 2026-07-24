@@ -16,3 +16,15 @@ export const updateProfile = async ({ fullname, username }) => {
     const { data } = await api.patch("/user/me", { fullname, username });
     return data; // { success, user }
 };
+
+export const getProfile = async id => {
+    const { data } = await api.get(`/user/${id}`);
+    return data; // { success, user: { fullname, username, followersCount, followingCount, postsCount } }
+};
+
+export const getPosts = async ({ cursor = null, limit = 12, id } = {}) => {
+    const params = { limit: 15 };
+    if (cursor) params.cursor = JSON.stringify(cursor);
+    const { data } = await api.get(`/user/${id}/posts`, { params });
+    return data;
+};
