@@ -4,6 +4,9 @@ import * as Haptics from "expo-haptics";
 
 import { createComment } from "../../controllers/post/comment.controller.js";
 import { optimisticCommentUpdate } from "../../utils/feed/optimisticCommentUpdate.js";
+import { useApp } from "../../store/app.store.js";
+
+const setToast = useApp.getState().setToast;
 
 export const useCommentSubmit = ({
     postId,
@@ -25,6 +28,7 @@ export const useCommentSubmit = ({
 
         onSuccess: res => {
             if (!res.success) return;
+            setToast("green=>Commented");
 
             // 1. Safely normalize the comment object with defaults
             const newComment = {

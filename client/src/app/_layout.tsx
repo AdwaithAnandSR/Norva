@@ -7,6 +7,7 @@ import { StatusBar } from "expo-status-bar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { useUser } from "../store/user.store.js";
+import Toast from "../components/common/Toast.jsx";
 
 const client = new QueryClient({
     defaultOptions: {
@@ -66,10 +67,11 @@ export default function RootLayout() {
                 backgroundColor: "black"
             }}
         >
-            <StatusBar style="auto" translucent />
+            <StatusBar style="auto" translucent animated />
             <QueryClientProvider client={client}>
                 <Layout />
             </QueryClientProvider>
+            <Toast />
         </View>
     );
 }

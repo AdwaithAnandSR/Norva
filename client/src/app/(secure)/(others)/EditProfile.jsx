@@ -26,8 +26,8 @@ const EditProfile = () => {
 
     const [fullname, setFullname] = useState(storedFullname);
     const [username, setUsername] = useState(storedUsername);
-    const [loading, setLoading]   = useState(false);
-    const [error, setError]       = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const handleSave = async () => {
         if (!fullname.trim() && !username.trim()) return;
@@ -52,10 +52,13 @@ const EditProfile = () => {
             }
 
             // Sync Zustand + query cache
-            updateProfileStore({ fullname: res.user.fullname, username: res.user.username });
+            updateProfileStore({
+                fullname: res.user.fullname,
+                username: res.user.username
+            });
             qc.invalidateQueries({ queryKey: ["profile", "me"] });
 
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             router.back();
         } catch {
             setError("Something went wrong. Try again.");
@@ -83,17 +86,32 @@ const EditProfile = () => {
                         marginBottom: 32
                     }}
                 >
-                    <TouchableOpacity onPress={() => router.back()} hitSlop={10}>
+                    <TouchableOpacity
+                        onPress={() => router.back()}
+                        hitSlop={10}
+                    >
                         <Feather name="arrow-left" size={22} color="#c4c4e0" />
                     </TouchableOpacity>
-                    <Text style={{ color: "#fff", fontFamily: "WinkyRoughExtraBold", fontSize: 20 }}>
+                    <Text
+                        style={{
+                            color: "#fff",
+                            fontFamily: "WinkyRoughExtraBold",
+                            fontSize: 20
+                        }}
+                    >
                         Edit Profile
                     </Text>
                     <TouchableOpacity onPress={handleSave} disabled={loading}>
                         {loading ? (
                             <ActivityIndicator color="#6437ff" size="small" />
                         ) : (
-                            <Text style={{ color: "#a78bfa", fontFamily: "SpaceMono", fontSize: 13 }}>
+                            <Text
+                                style={{
+                                    color: "#a78bfa",
+                                    fontFamily: "SpaceMono",
+                                    fontSize: 13
+                                }}
+                            >
                                 Save
                             </Text>
                         )}
@@ -115,7 +133,14 @@ const EditProfile = () => {
                 )}
 
                 {/* Full name */}
-                <Text style={{ color: "rgba(196,196,224,0.5)", fontFamily: "SpaceMono", fontSize: 11, marginBottom: 8 }}>
+                <Text
+                    style={{
+                        color: "rgba(196,196,224,0.5)",
+                        fontFamily: "SpaceMono",
+                        fontSize: 11,
+                        marginBottom: 8
+                    }}
+                >
                     FULL NAME
                 </Text>
                 <TextInput
@@ -139,7 +164,14 @@ const EditProfile = () => {
                 />
 
                 {/* Username */}
-                <Text style={{ color: "rgba(196,196,224,0.5)", fontFamily: "SpaceMono", fontSize: 11, marginBottom: 8 }}>
+                <Text
+                    style={{
+                        color: "rgba(196,196,224,0.5)",
+                        fontFamily: "SpaceMono",
+                        fontSize: 11,
+                        marginBottom: 8
+                    }}
+                >
                     USERNAME
                 </Text>
                 <View
@@ -154,12 +186,20 @@ const EditProfile = () => {
                         marginBottom: 24
                     }}
                 >
-                    <Text style={{ color: "rgba(196,196,224,0.3)", fontFamily: "SpaceMono", fontSize: 14 }}>
+                    <Text
+                        style={{
+                            color: "rgba(196,196,224,0.3)",
+                            fontFamily: "SpaceMono",
+                            fontSize: 14
+                        }}
+                    >
                         @
                     </Text>
                     <TextInput
                         value={username}
-                        onChangeText={t => setUsername(t.toLowerCase().replace(/\s/g, ""))}
+                        onChangeText={t =>
+                            setUsername(t.toLowerCase().replace(/\s/g, ""))
+                        }
                         placeholder="username"
                         placeholderTextColor="#444"
                         maxLength={30}

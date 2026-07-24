@@ -1,16 +1,31 @@
 import api from "../../utils/axios.js";
 
-export const createPost = async ({ title, description, tags, media }) => {
+import { useApp } from "../../store/app.store.js";
+
+const setToast = useApp.getState().setToast;
+
+export const createPost = async ({
+    title,
+    description,
+    tags,
+    media,
+    imageDetails
+}) => {
     try {
         const { data } = await api.post("/post/create", {
             title,
             description,
             tags,
-            ...media
+            ...media,
+            height: imageDetails?.height ?? -1,
+            width: imageDetails?.width ?? -1
         });
+
+        setToast("green=>Created");
 
         return true;
     } catch (error) {
+        setToast("red=>Failed");
         console.log(error);
 
         return false;
@@ -26,19 +41,34 @@ export const fetchFeed = async ({ cursor = null, limit = 10 } = {}) => {
 };
 
 export const deletePost = async postId => {
-    const { data } = await api.delete(`/post/${postId}`);
-    
-    console.log("data ", data)
-    return data; // { success }
+    try {
+        const { data } = await api.delete(`/post/${postId}`);
+
+        setToast("green=>Deleted");
+        return data; // { success }
+    } catch (e) {
+        setToast("red=>Failed");
+        console.log(e);
+
+        return { success: false };
+    }
 };
 
 export const editPost = async (postId, { title, description, tags }) => {
-    const { data } = await api.patch(`/post/${postId}`, {
-        title,
-        description,
-        tags
-    });
-    return data; // { success, post }
+    try {
+        const { data } = await api.patch(`/post/${postId}`, {
+            title,
+            description,
+            tags
+        });
+        setToast("green=>Edited");
+        return data; // { success, post }
+    } catch (e) {
+        setToast("red=>Failed");
+        console.log(e);
+
+        return { success: false };
+    }
 };
 
 export const incrementView = async postId => {

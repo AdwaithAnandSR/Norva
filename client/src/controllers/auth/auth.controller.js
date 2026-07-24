@@ -4,6 +4,9 @@ import { Text } from "react-native";
 
 import { storeSession } from "../../storage/storage.js";
 import { useUser } from "../../store/user.store.js";
+import { useApp } from "../../store/app.store.js";
+
+const setToast = useApp.getState().setToast;
 
 const handleSignUp = async (data, page, setMessage) => {
     const handleMessage = msg => {
@@ -17,7 +20,7 @@ const handleSignUp = async (data, page, setMessage) => {
         handleMessage("please wait...");
 
         const res = await axios.post(`/auth/${page}`, data);
-        
+
         const { user, refreshToken, accessToken } = res.data;
 
         storeSession({
@@ -33,9 +36,13 @@ const handleSignUp = async (data, page, setMessage) => {
             role,
             userId
         });
-        if (res.data.success)
+
+        if (res.data.success) {
+            setToast("green=>Logged&In");
             return handleMessage("Authentication Successfull 💫");
+        }
     } catch (error) {
+        setToast("red=>Authentication Failed");
         console.log("Error while authentication: ", error.message);
         if (error?.response?.data)
             handleMessage(error.response.data.message?.split("_")?.join(" "));

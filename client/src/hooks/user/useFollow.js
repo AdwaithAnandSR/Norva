@@ -1,26 +1,32 @@
 import { useMutation } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 
-import { followUser, unfollowUser } from "../../controllers/user/user.controller.js";
+import {
+    followUser,
+    unfollowUser
+} from "../../controllers/user/user.controller.js";
 import { useFollowStore } from "../../store/follow.store.js";
 import { useUser } from "../../store/user.store.js";
+import { useApp } from "../../store/app.store.js";
 
-export const useFollow = (userId) => {
+const setToast = useApp.getState().setToast;
+
+export const useFollow = userId => {
     // Select granular state slices to prevent unnecessary re-renders
-    const isFollowing = useFollowStore((s) => s.states[userId] ?? false);
-    const setFollowing = useFollowStore((s) => s.setFollowing);
+    const isFollowing = useFollowStore(s => s.states[userId] ?? false);
+    const setFollowing = useFollowStore(s => s.setFollowing);
 
-    const incrementFollowing = useUser((s) => s.incrementFollowing);
-    const decrementFollowing = useUser((s) => s.decrementFollowing);
+    const incrementFollowing = useUser(s => s.incrementFollowing);
+    const decrementFollowing = useUser(s => s.decrementFollowing);
 
     const mutation = useMutation({
-        mutationFn: async (currentlyFollowing) => {
+        mutationFn: async currentlyFollowing => {
             return currentlyFollowing
                 ? unfollowUser(userId)
                 : followUser(userId);
         },
 
-        onMutate: async (currentlyFollowing) => {
+        onMutate: async currentlyFollowing => {
             // 1. Haptic feedback on tap
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
@@ -31,8 +37,10 @@ export const useFollow = (userId) => {
             // 3. Apply optimistic UI state immediately
             setFollowing(userId, nextIsFollowing);
             if (nextIsFollowing) {
+                setToast("green=>Followed");
                 incrementFollowing();
             } else {
+                setToast("green=>Unfollowed");
                 decrementFollowing();
             }
 
@@ -43,6 +51,7 @@ export const useFollow = (userId) => {
         onError: (err, currentlyFollowing, context) => {
             // Revert to the snapshot state if the API call fails
             if (!context) return;
+            setToast("red=>Failed");
 
             const { previousIsFollowing } = context;
             setFollowing(userId, previousIsFollowing);
@@ -54,12 +63,12 @@ export const useFollow = (userId) => {
             }
         },
 
-        onSuccess: (res) => {
+        onSuccess: res => {
             // Sync with backend source-of-truth if available
             if (res?.success && typeof res.isFollowing === "boolean") {
                 setFollowing(userId, res.isFollowing);
             }
-        },
+        }
     });
 
     const toggle = () => {
@@ -71,6 +80,6 @@ export const useFollow = (userId) => {
     return {
         isFollowing,
         isPending: mutation.isPending,
-        toggle,
+        toggle
     };
 };

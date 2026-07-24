@@ -18,37 +18,55 @@ const QuickButtons = ({ hasNoPosts }) => {
     return (
         <View style={{ gap: 10, marginTop: 12, paddingHorizontal: 24 }}>
             <TouchableOpacity
-                style={[buttonGlow, {
-                    borderRadius: 24,
-                    paddingVertical: 12,
-                    alignItems: "center",
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    gap: 8,
-                    borderWidth: 1,
-                    borderColor: "rgba(100,55,255,0.3)"
-                }]}
+                style={[
+                    buttonGlow,
+                    {
+                        borderRadius: 24,
+                        paddingVertical: 12,
+                        alignItems: "center",
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        gap: 8,
+                        borderWidth: 1,
+                        borderColor: "rgba(100,55,255,0.3)"
+                    }
+                ]}
                 onPress={handleEdit}
             >
                 <Feather name="edit-2" size={15} color="#a78bfa" />
-                <Text style={{ color: "#a78bfa", fontFamily: "SpaceMono", fontSize: 13 }}>
+                <Text
+                    style={{
+                        color: "#a78bfa",
+                        fontFamily: "SpaceMono",
+                        fontSize: 13
+                    }}
+                >
                     Edit Profile
                 </Text>
             </TouchableOpacity>
 
             {hasNoPosts && (
                 <TouchableOpacity
-                    style={[buttonGlow, {
-                        borderRadius: 24,
-                        paddingVertical: 12,
-                        alignItems: "center",
-                        backgroundColor: "rgba(100,55,255,0.15)",
-                        borderWidth: 1,
-                        borderColor: "#6437ff"
-                    }]}
+                    style={[
+                        buttonGlow,
+                        {
+                            borderRadius: 24,
+                            paddingVertical: 12,
+                            alignItems: "center",
+                            backgroundColor: "rgba(100,55,255,0.15)",
+                            borderWidth: 1,
+                            borderColor: "#6437ff"
+                        }
+                    ]}
                     onPress={handleCreate}
                 >
-                    <Text style={{ color: "#fff", fontFamily: "SpaceMono", fontSize: 13 }}>
+                    <Text
+                        style={{
+                            color: "#fff",
+                            fontFamily: "SpaceMono",
+                            fontSize: 13
+                        }}
+                    >
                         Create My First Post
                     </Text>
                 </TouchableOpacity>

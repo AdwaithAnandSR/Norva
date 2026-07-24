@@ -1,6 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { deleteComment } from "../../controllers/post/comment.controller.js";
+import { useApp } from "../../store/app.store.js";
+
+const setToast = useApp.getState().setToast;
 
 export const useCommentDelete = ({ postId, parentId = null }) => {
     const qc = useQueryClient();
@@ -11,6 +14,7 @@ export const useCommentDelete = ({ postId, parentId = null }) => {
         mutationFn: commentId => deleteComment(commentId),
 
         onSuccess: (_, commentId) => {
+            setToast("green=>Deleted");
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             if (!parentId) {
                 qc.setQueryData(["comments", cleanPostId], old => {

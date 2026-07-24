@@ -14,7 +14,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { Feather } from "@expo/vector-icons";
 
-import { editPost } from "../../../controllers/post/feed.controller.js";
+import { editPost } from "../../../../controllers/post/feed.controller.js";
 
 const EditPost = () => {
     const {
@@ -83,7 +83,7 @@ const EditPost = () => {
                 };
             });
 
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             router.back();
         } catch {
             setError("Failed to save. Try again.");
@@ -93,10 +93,7 @@ const EditPost = () => {
     };
 
     return (
-        <KeyboardAvoidingView
-            className="flex-1 bg-primary"
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
+        <KeyboardAvoidingView className="flex-1 bg-primary">
             <ScrollView
                 className="flex-1"
                 contentContainerStyle={{ padding: 20, paddingBottom: 60 }}

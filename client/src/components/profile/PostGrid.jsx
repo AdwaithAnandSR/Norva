@@ -17,11 +17,13 @@ const blurhash = "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azay";
 const PostTile = ({ post }) => (
     <TouchableOpacity
         onPress={() =>
+            post.url &&
             router.push({
                 pathname: "/FullScreenImage",
                 params: { postId: post._id, uri: post.url }
             })
         }
+        
         style={{
             width: TILE,
             height: TILE,
@@ -41,21 +43,8 @@ const PostTile = ({ post }) => (
             />
         ) : (
             // Text-only post
-            <View
-                style={{
-                    flex: 1,
-                    padding: 8,
-                    justifyContent: "center"
-                }}
-            >
-                <Text
-                    numberOfLines={4}
-                    style={{
-                        color: "#c4c4e0",
-                        fontSize: 10,
-                        fontFamily: "SpaceMono"
-                    }}
-                >
+            <View className="flex-1 justify-center items-center">
+                <Text numberOfLines={4} className="text-text font-lg text-bold">
                     {post.title || post.description}
                 </Text>
             </View>
@@ -64,13 +53,8 @@ const PostTile = ({ post }) => (
 );
 
 const PostsGrid = ({ postsQuery }) => {
-    const {
-        data,
-        fetchNextPage,
-        hasNextPage,
-        isFetchingNextPage,
-        isLoading
-    } = postsQuery;
+    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+        postsQuery;
 
     const posts = data?.pages.flatMap(p => p.posts) ?? [];
 
@@ -84,7 +68,9 @@ const PostsGrid = ({ postsQuery }) => {
 
     if (!posts.length) {
         return (
-            <View style={{ paddingVertical: 40, alignItems: "center", gap: 10 }}>
+            <View
+                style={{ paddingVertical: 40, alignItems: "center", gap: 10 }}
+            >
                 <Feather name="camera-off" size={32} color="#333" />
                 <Text
                     style={{
