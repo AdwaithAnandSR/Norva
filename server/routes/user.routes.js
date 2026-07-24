@@ -15,7 +15,7 @@ router.patch("/me", updateProfile);
 router.get("/me/posts", (req, res) => {
     req.params.id = req.user.userId;
     getUserPosts(req, res);
-});
+})
 
 router.get("/:id", getUserProfile);
 router.post("/:id/follow", followUser);

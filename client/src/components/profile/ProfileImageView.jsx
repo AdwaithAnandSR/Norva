@@ -24,7 +24,7 @@ const ProfileImageView = () => {
     return (
         <View>
             <Image
-                source={require("@assets/images/file_0000000046c07209a8ba2a5c37b608af.png")}
+                source={require("../../../assets/images/file_0000000046c07209a8ba2a5c37b608af.png")}
                 style={{
                     width: "100%",
                     height: COVER_HEIGHT
@@ -45,7 +45,7 @@ const ProfileImageView = () => {
                     className="-mt-20 border-5 border-border"
                 >
                     <Image
-                        source={require("@assets/images/IMG_20250716_130532.jpg")}
+                        source={require("../../../assets/images/IMG_20250716_130532.jpg")}
                         style={{
                             width: "100%",
                             height: "100%"

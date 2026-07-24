@@ -17,7 +17,7 @@ import {
     getComments,
     comment,
     likeComment,
-    replies
+    replies, deleteComment
 } from "../controllers/feed/comment.js";
 
 router.post("/create", createFeed);
@@ -37,5 +37,7 @@ router.post("/:postId/comments", comment);
 router.post("/comment/:commentId/like", likeComment);
 
 router.get("/comment/:commentId/replies", replies);
+
+router.delete("/comment/:commentId", deleteComment);
 
 export default router;

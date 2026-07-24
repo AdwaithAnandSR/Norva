@@ -3,7 +3,9 @@ import chalk from "chalk";
 
 try {
     const DB_PASSWORD = process.env.DB_PASSWORD;
-    const uri  = `mongodb+srv://norva:${DB_PASSWORD}@cluster0.8ayfqlk.mongodb.net/norva?appName=Cluster0`
+    const DB_USER = process.env.DB_USER;
+    
+    const uri  = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@cluster0.8ayfqlk.mongodb.net/norva?appName=Cluster0`
 
     if (!DB_PASSWORD) {
         throw new Error(

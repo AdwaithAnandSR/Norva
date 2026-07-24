@@ -1,76 +1,76 @@
 import { useMutation } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 
-import {
-    followUser,
-    unfollowUser
-} from "../../controllers/user/user.controller.js";
-
+import { followUser, unfollowUser } from "../../controllers/user/user.controller.js";
 import { useFollowStore } from "../../store/follow.store.js";
 import { useUser } from "../../store/user.store.js";
 
-export const useFollow = userId => {
-    const states = useFollowStore(s => s.states);
-    const pending = useFollowStore(s => s.pending);
+export const useFollow = (userId) => {
+    // Select granular state slices to prevent unnecessary re-renders
+    const isFollowing = useFollowStore((s) => s.states[userId] ?? false);
+    const setFollowing = useFollowStore((s) => s.setFollowing);
 
-    const setFollowing = useFollowStore(s => s.setFollowing);
-    const setPending = useFollowStore(s => s.setPending);
-
-    const incrementFollowing = useUser(s => s.incrementFollowing);
-    const decrementFollowing = useUser(s => s.decrementFollowing);
-
-    const isFollowing = states[userId] ?? false;
-    const isPending = pending[userId] ?? false;
+    const incrementFollowing = useUser((s) => s.incrementFollowing);
+    const decrementFollowing = useUser((s) => s.decrementFollowing);
 
     const mutation = useMutation({
-        mutationFn: async () => {
-            return isFollowing
+        mutationFn: async (currentlyFollowing) => {
+            return currentlyFollowing
                 ? unfollowUser(userId)
                 : followUser(userId);
         },
 
-        onMutate: async () => {
-            setPending(userId, true);
+        onMutate: async (currentlyFollowing) => {
+            // 1. Haptic feedback on tap
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-            setFollowing(userId, !isFollowing);
+            // 2. Snapshot previous state for rollback
+            const previousIsFollowing = currentlyFollowing;
+            const nextIsFollowing = !currentlyFollowing;
 
-            isFollowing
-                ? decrementFollowing()
-                : incrementFollowing();
+            // 3. Apply optimistic UI state immediately
+            setFollowing(userId, nextIsFollowing);
+            if (nextIsFollowing) {
+                incrementFollowing();
+            } else {
+                decrementFollowing();
+            }
 
-            Haptics.impactAsync(
-                Haptics.ImpactFeedbackStyle.Light
-            );
+            // Pass snapshot context to onError
+            return { previousIsFollowing };
         },
 
-        onSuccess: res => {
-            if (res?.success) {
-                setFollowing(userId, res.isFollowing);
+        onError: (err, currentlyFollowing, context) => {
+            // Revert to the snapshot state if the API call fails
+            if (!context) return;
+
+            const { previousIsFollowing } = context;
+            setFollowing(userId, previousIsFollowing);
+
+            if (previousIsFollowing) {
+                incrementFollowing();
+            } else {
+                decrementFollowing();
             }
         },
 
-        onError: () => {
-            setFollowing(userId, isFollowing);
-
-            isFollowing
-                ? incrementFollowing()
-                : decrementFollowing();
+        onSuccess: (res) => {
+            // Sync with backend source-of-truth if available
+            if (res?.success && typeof res.isFollowing === "boolean") {
+                setFollowing(userId, res.isFollowing);
+            }
         },
-
-        onSettled: () => {
-            setPending(userId, false);
-        }
     });
 
     const toggle = () => {
-        if (isPending) return;
-
-        mutation.mutate();
+        // Prevent trigger while mutation is in-flight
+        if (mutation.isPending) return;
+        mutation.mutate(isFollowing);
     };
 
     return {
         isFollowing,
-        isPending,
-        toggle
+        isPending: mutation.isPending,
+        toggle,
     };
 };

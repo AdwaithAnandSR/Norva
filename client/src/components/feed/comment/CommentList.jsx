@@ -4,20 +4,33 @@ import { FlashList } from "@shopify/flash-list";
 import CommentRow from "./CommentRow.jsx";
 import Loader from "../../common/Loader.tsx";
 
-const CommentList = ({ commentsQuery, onReply }) => {
+const CommentList = ({
+    commentsQuery,
+    onReply,
+    expandedCommentIds,
+    toggleExpand,
+    postId
+}) => {
     const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
         commentsQuery;
 
     const comments = data?.pages.flatMap(p => p.comments) ?? [];
 
     const renderItem = ({ item }) => (
-        <CommentRow comment={item} onReply={onReply} />
+        <CommentRow
+            comment={item}
+            onReply={onReply}
+            postId={postId}
+            isExpanded={expandedCommentIds?.has(item._id)}
+            onToggleExpand={() => toggleExpand?.(item._id)}
+        />
     );
 
     return (
         <View className="flex-1 px-4">
             <FlashList
                 data={comments}
+                extraData={comments}
                 renderItem={renderItem}
                 keyExtractor={item => item._id}
                 estimatedItemSize={80}

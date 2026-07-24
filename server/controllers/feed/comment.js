@@ -180,3 +180,63 @@ export const replies = async (req, res) => {
         return res.status(500).json({ success: false });
     }
 };
+
+export const deleteComment = async (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const myId = req.user.userId;
+
+        const comment = await Comment.findById(commentId);
+        if (!comment) {
+            return res
+                .status(404)
+                .json({ success: false, message: "COMMENT_NOT_FOUND" });
+        }
+
+        // Authorization check: Only the comment author can delete
+        if (comment.userId.toString() !== myId) {
+            return res
+                .status(403)
+                .json({ success: false, message: "UNAUTHORIZED" });
+        }
+
+        const { postId, parentId } = comment;
+
+        if (parentId) {
+            await Comment.findByIdAndDelete(commentId);
+
+            // Decrement parent comment's repliesCount atomically
+            await Comment.findByIdAndUpdate(parentId, {
+                $inc: { repliesCount: -1 }
+            });
+
+            // Decrement post's total commentsCount atomically
+            await Post.findByIdAndUpdate(postId, {
+                $inc: { commentsCount: -1 }
+            });
+        } else {
+            // 1. Cascade delete all nested replies attached to this comment
+            const replyDeletion = await Comment.deleteMany({
+                parentId: commentId
+            });
+            const deletedRepliesCount = replyDeletion.deletedCount || 0;
+
+            // 2. Delete the main comment itself
+            await Comment.findByIdAndDelete(commentId);
+
+            // 3. Decrement post total commentsCount by (1 comment + all deleted replies)
+            const totalRemoved = 1 + deletedRepliesCount;
+            await Post.findByIdAndUpdate(postId, {
+                $inc: { commentsCount: -totalRemoved }
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "COMMENT_DELETED"
+        });
+    } catch (error) {
+        console.error("deleteComment error:", error);
+        return res.status(500).json({ success: false });
+    }
+};
