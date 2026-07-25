@@ -131,7 +131,14 @@ const PostCard = ({ post }) => {
                 navigating.current = true;
                 router.push({
                     pathname: "/FullScreenImage",
-                    params: { postId: post._id, uri: post.url }
+                    params: {
+                        postId: post._id,
+                        uri: post.url,
+                        title: post.title ?? "",
+                        description: post.description ?? "",
+                        tags: JSON.stringify(post.tags ?? []),
+                        userId: typeof post.userId === "object" ? post.userId?._id : post.userId
+                    }
                 });
                 setTimeout(() => {
                     navigating.current = false;

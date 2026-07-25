@@ -7,7 +7,9 @@ export const getMyProfile = async (req, res) => {
 
         const [user, postsCount] = await Promise.all([
             User.findById(myId)
-                .select("fullname username followersCount followingCount")
+                .select(
+                    "fullname username profileImage backgroundImage followersCount followingCount"
+                )
                 .lean(),
             Post.countDocuments({ userId: myId })
         ]);
@@ -72,9 +74,14 @@ export const getUserPosts = async (req, res) => {
 export const updateProfile = async (req, res) => {
     try {
         const myId = req.user.userId;
-        const { fullname, username } = req.body;
+        const { fullname, username, profileImage, backgroundImage } = req.body;
 
-        if (!fullname?.trim() && !username?.trim())
+        if (
+            !fullname?.trim() &&
+            !username?.trim() &&
+            profileImage === undefined &&
+            backgroundImage === undefined
+        )
             return res
                 .status(400)
                 .json({ success: false, message: "NOTHING_TO_UPDATE" });
@@ -94,11 +101,18 @@ export const updateProfile = async (req, res) => {
         const user = await User.findById(myId);
         if (fullname) user.fullname = fullname.trim();
         if (username) user.username = username.trim();
+        if (profileImage !== undefined) user.profileImage = profileImage;
+        if (backgroundImage !== undefined) user.backgroundImage = backgroundImage;
         await user.save();
 
         return res.status(200).json({
             success: true,
-            user: { fullname: user.fullname, username: user.username }
+            user: {
+                fullname: user.fullname,
+                username: user.username,
+                profileImage: user.profileImage,
+                backgroundImage: user.backgroundImage
+            }
         });
     } catch (error) {
         console.error("updateProfile error:", error);
@@ -114,7 +128,7 @@ export const getUserProfile = async (req, res) => {
         const [user, postsCount] = await Promise.all([
             User.findById(targetId)
                 .select(
-                    "fullname username followersCount followingCount followers"
+                    "fullname username profileImage backgroundImage followersCount followingCount followers"
                 )
                 .lean(),
             Post.countDocuments({ userId: targetId })

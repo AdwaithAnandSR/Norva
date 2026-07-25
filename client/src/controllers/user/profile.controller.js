@@ -12,8 +12,8 @@ export const getMyPosts = async ({ cursor = null, limit = 12 } = {}) => {
     return data; // { success, posts, nextCursor, hasMore }
 };
 
-export const updateProfile = async ({ fullname, username }) => {
-    const { data } = await api.patch("/user/me", { fullname, username });
+export const updateProfile = async ({ fullname, username, profileImage, backgroundImage }) => {
+    const { data } = await api.patch("/user/me", { fullname, username, profileImage, backgroundImage });
     return data; // { success, user }
 };
 

@@ -1,20 +1,12 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
 
 const ChatList = () => {
-  return (
-    <View style={styles.container}>
-      <Text>ChatList</Text>
-    </View>
-  );
+    return (
+        <View className="flex-1 bg-primary">
+            <Text className="text-text text-xl text-center">ChatList</Text>
+        </View>
+    );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
 
 export default ChatList;

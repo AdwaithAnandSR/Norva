@@ -13,6 +13,14 @@ const userSchema = mongoose.Schema(
             required: true
         },
         fullname: String,
+        profileImage: {
+            type: String,
+            default: ""
+        },
+        backgroundImage: {
+            type: String,
+            default: ""
+        },
         role: {
             type: String,
             enum: ["user", "admin"],

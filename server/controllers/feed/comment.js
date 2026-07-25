@@ -26,7 +26,7 @@ export const getComments = async (req, res) => {
         const comments = await Comment.find(query)
             .sort({ createdAt: -1, _id: -1 })
             .limit(limit + 1)
-            .populate("userId", "username fullname")
+            .populate("userId", "username fullname profileImage")
             .lean();
 
         const hasMore = comments.length > limit;
@@ -95,7 +95,7 @@ export const comment = async (req, res) => {
         }
 
         // Return populated comment
-        const populated = await comment.populate("userId", "username fullname");
+        const populated = await comment.populate("userId", "username fullname profileImage");
 
         return res.status(201).json({ success: true, comment: populated });
     } catch (error) {
@@ -156,7 +156,7 @@ export const replies = async (req, res) => {
         const replies = await Comment.find(query)
             .sort({ createdAt: 1, _id: 1 }) // oldest first for replies
             .limit(limit + 1)
-            .populate("userId", "username fullname")
+            .populate("userId", "username fullname profileImage")
             .lean();
 
         const hasMore = replies.length > limit;

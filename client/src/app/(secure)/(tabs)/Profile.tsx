@@ -20,6 +20,7 @@ import PostsGrid from "../../../components/profile/PostGrid.jsx";
 
 const Profile = () => {
     const updateStats = useUser(state => state.updateStats);
+    const updateProfile = useUser(state => state.updateProfile);
 
     const profileQuery = useMyProfile();
     const postsQuery   = useMyPosts();
@@ -27,13 +28,19 @@ const Profile = () => {
     const profile = profileQuery.data?.user;
     const posts   = postsQuery.data?.pages.flatMap(p => p.posts) ?? [];
 
-    // Sync profile stats into Zustand so other screens have them
+    // Sync profile stats and details into Zustand so other screens have them
     useEffect(() => {
         if (profile) {
             updateStats({
                 followersCount: profile.followersCount,
                 followingCount: profile.followingCount,
                 postsCount:     profile.postsCount
+            });
+            updateProfile({
+                fullname: profile.fullname,
+                username: profile.username,
+                profileImage: profile.profileImage,
+                backgroundImage: profile.backgroundImage
             });
         }
     }, [profile]);

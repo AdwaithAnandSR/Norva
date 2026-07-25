@@ -24,7 +24,7 @@ const paginate = async (query, limit) => {
     const docs = await Post.find(query)
         .sort({ createdAt: -1, _id: -1 })
         .limit(limit + 1)
-        .populate("userId", "username fullname")
+        .populate("userId", "username fullname profileImage")
         .lean();
 
     const hasMore = docs.length > limit;

@@ -1,20 +1,23 @@
 import ORGAxios from "axios";
 import axios from "../utils/axios";
 
-export const uploadToCloudinary = async (file, onProgress) => {
+export const uploadToCloudinary = async (file, onProgress, folder = "posts") => {
     try {
         const { data: signData } = await axios.post("/file/signature", {
-            folder: "posts"
+            folder
         });
 
         const formData = new FormData();
 
+        const asset = file.assets?.[0] || file;
+        const uri = asset.uri;
+        const type = asset.mimeType || asset.type || "image/jpeg";
+        const name = asset.name || `upload.${uri.split(".").pop()}`;
+
         formData.append("file", {
-            uri: file.assets[0].uri,
-            type: file.assets[0].mimeType,
-            name:
-                file.assets[0].name ||
-                `upload.${file.assets[0].uri.split(".").pop()}`
+            uri,
+            type,
+            name
         });
 
         formData.append("api_key", signData.data.apiKey);

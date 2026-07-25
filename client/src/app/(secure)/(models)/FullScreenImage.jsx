@@ -23,8 +23,13 @@ import Animated, {
     withTiming,
     runOnJS
 } from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
+import { useQueryClient } from "@tanstack/react-query";
 
 import ReelPlayer from "../../../components/feed/ReelPlayer";
+import PostOptions from "../../../components/feed/PostOptions";
+import { useUser } from "../../../store/user.store";
+import { deletePost } from "../../../controllers/post/feed.controller";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const AnimatedImage = Animated.createAnimatedComponent(Image);
@@ -35,12 +40,76 @@ export default function ImageScreen() {
         uri,
         mediaType = "image",
         width,
-        height
+        height,
+        title,
+        description,
+        tags,
+        userId
     } = useLocalSearchParams();
+
+    const currentUserId = useUser(state => state.userId);
+    const qc = useQueryClient();
 
     const blurTargetRef = useRef(null);
 
     const [originalView, setOriginalView] = useState(false);
+    const [optionsVisible, setOptionsVisible] = useState(false);
+
+    // Look up cached post data if available
+    const cachedPost = (() => {
+        if (!postId || postId === "profile") return null;
+        const feedData = qc.getQueryData(["feed"]);
+        let found = feedData?.pages?.flatMap(p => p.posts)?.find(p => p._id === postId);
+        if (found) return found;
+
+        const reelsData = qc.getQueryData(["reels"]);
+        found = reelsData?.pages?.flatMap(p => p.posts)?.find(p => p._id === postId);
+        if (found) return found;
+
+        const myPostsData = qc.getQueryData(["posts", "me"]);
+        found = myPostsData?.pages?.flatMap(p => p.posts)?.find(p => p._id === postId);
+        return found;
+    })();
+
+    const postUserId = userId || cachedPost?.userId?._id || cachedPost?.userId;
+    const isOwner = postUserId
+        ? postUserId === currentUserId || postUserId?._id === currentUserId
+        : false;
+
+    const postTitle = title ?? cachedPost?.title ?? "";
+    const postDesc = description ?? cachedPost?.description ?? "";
+    const postTags = tags ?? JSON.stringify(cachedPost?.tags ?? []);
+
+    const handleEdit = () => {
+        setOptionsVisible(false);
+        if (!postId || postId === "profile") return;
+        router.push({
+            pathname: "/EditPost",
+            params: {
+                postId,
+                title: postTitle,
+                description: postDesc,
+                tags: typeof postTags === "string" ? postTags : JSON.stringify(postTags ?? [])
+            }
+        });
+    };
+
+    const handleDelete = async () => {
+        setOptionsVisible(false);
+        if (!postId || postId === "profile") return;
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+        try {
+            await deletePost(postId);
+            qc.invalidateQueries({ queryKey: ["feed"] });
+            qc.invalidateQueries({ queryKey: ["reels"] });
+            qc.invalidateQueries({ queryKey: ["posts"] });
+            qc.invalidateQueries({ queryKey: ["profile"] });
+            router.back();
+        } catch {
+            qc.invalidateQueries({ queryKey: ["posts"] });
+        }
+    };
 
     const ratio = width && height ? Number(width) / Number(height) : 1;
 
@@ -194,6 +263,10 @@ export default function ImageScreen() {
                             }}
                         >
                             <Pressable
+                                onPress={() => {
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                    setOptionsVisible(true);
+                                }}
                                 className="px-2 py-2 rounded-3xl flex-row justify-center items-center gap-1"
                                 hitSlop={10}
                             >
@@ -250,6 +323,14 @@ export default function ImageScreen() {
                         )}
                     </GestureDetector>
                 </View>
+
+                <PostOptions
+                    visible={optionsVisible}
+                    isOwner={isOwner}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onClose={() => setOptionsVisible(false)}
+                />
             </BlurTargetView>
         </GestureHandlerRootView>
     );

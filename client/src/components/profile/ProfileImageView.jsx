@@ -3,37 +3,79 @@ import {
     Text,
     StyleSheet,
     Dimensions,
-    TouchableOpacity
+    TouchableOpacity,
+    Image as RNImage
 } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 import { useUser } from "../../store/user.store";
 
 const blurhash = "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azay";
 
-const { width: vw, height: vh } = Dimensions.get("window");
+const { width: vw } = Dimensions.get("window");
 
 const IMAGE_SIZE = vw * 0.3;
 const COVER_HEIGHT = vw * 0.65;
 
-const ProfileImageView = () => {
-    const fullname = useUser(state => state.fullname);
-    const username = useUser(state => state.username);
+const DEFAULT_COVER = require("../../../assets/images/file_0000000046c07209a8ba2a5c37b608af.png");
+const DEFAULT_AVATAR = require("../../../assets/images/IMG_20250716_130532.jpg");
+
+const ProfileImageView = ({
+    profileImage: propProfileImage,
+    backgroundImage: propBackgroundImage,
+    fullname: propFullname,
+    username: propUsername
+}) => {
+    const storeFullname = useUser(state => state.fullname);
+    const storeUsername = useUser(state => state.username);
+    const storeProfileImage = useUser(state => state.profileImage);
+    const storeBackgroundImage = useUser(state => state.backgroundImage);
+
+    const fullname = propFullname ?? storeFullname;
+    const username = propUsername ?? storeUsername;
+    const profileImage = propProfileImage ?? storeProfileImage;
+    const backgroundImage = propBackgroundImage ?? storeBackgroundImage;
+
+    const coverSource = backgroundImage ? { uri: backgroundImage } : DEFAULT_COVER;
+    const avatarSource = profileImage ? { uri: profileImage } : DEFAULT_AVATAR;
+
+    const handleAvatarPress = () => {
+        const avatarUri = profileImage || RNImage.resolveAssetSource(DEFAULT_AVATAR).uri;
+        router.push({
+            pathname: "/FullScreenImage",
+            params: {
+                postId: "profile",
+                uri: avatarUri
+            }
+        });
+    };
+
+    const handleCoverPress = () => {
+        const coverUri = backgroundImage || RNImage.resolveAssetSource(DEFAULT_COVER).uri;
+        router.push({
+            pathname: "/FullScreenImage",
+            params: {
+                postId: "profile_cover",
+                uri: coverUri
+            }
+        });
+    };
 
     return (
         <View>
-            <Image
-                source={require("../../../assets/images/file_0000000046c07209a8ba2a5c37b608af.png")}
-                style={{
-                    width: "100%",
-                    height: COVER_HEIGHT
-                }}
-                placeholder={{ blurhash }}
-                contentFit="cover"
-                transition={1000}
-            />
+            <TouchableOpacity activeOpacity={0.95} onPress={handleCoverPress}>
+                <Image
+                    source={coverSource}
+                    style={{
+                        width: "100%",
+                        height: COVER_HEIGHT
+                    }}
+                    placeholder={{ blurhash }}
+                    contentFit="cover"
+                    transition={1000}
+                />
+            </TouchableOpacity>
 
             <View className="-mt-8 rounded-t-2xl bg-primary pl-5 ">
                 <TouchableOpacity
@@ -43,19 +85,11 @@ const ProfileImageView = () => {
                         borderRadius: IMAGE_SIZE / 2,
                         overflow: "hidden"
                     }}
-                    onPress={() =>
-                        router.push({
-                            pathname: "/FullScreenImage",
-                            params: {
-                                postId: "profile",
-                                uri: "../../../assets/images/IMG_20250716_130532.jpg"
-                            }
-                        })
-                    }
+                    onPress={handleAvatarPress}
                     className="-mt-20 border-5 border-border"
                 >
                     <Image
-                        source={require("../../../assets/images/IMG_20250716_130532.jpg")}
+                        source={avatarSource}
                         style={{
                             width: "100%",
                             height: "100%"
