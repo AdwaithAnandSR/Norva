@@ -2,7 +2,9 @@ import { Router } from "express";
 
 import {
     followUser,
-    unfollowUser
+    unfollowUser,
+    getFollowers,
+    getFollowing
 } from "../controllers/user/follow.controller.js";
 
 import {
@@ -37,6 +39,8 @@ router.delete("/search/recent", clearRecentSearches);
 
 router.get("/:id", getUserProfile);
 router.get("/:id/posts", getUserPosts);
+router.get("/:id/followers", getFollowers);
+router.get("/:id/following", getFollowing);
 router.post("/:id/follow", followUser);
 router.delete("/:id/follow", unfollowUser);
 

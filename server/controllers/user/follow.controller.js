@@ -80,3 +80,77 @@ export const unfollowUser = async (req, res) => {
         return res.status(500).json({ success: false });
     }
 };
+
+export const getFollowers = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const myId = req.user.userId;
+
+        const [user, me] = await Promise.all([
+            User.findById(id)
+                .select("followers")
+                .populate("followers", "username fullname profileImage followersCount")
+                .lean(),
+            User.findById(myId).select("following").lean()
+        ]);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "USER_NOT_FOUND" });
+        }
+
+        const myFollowingSet = new Set(
+            (me?.following ?? []).map(fId => fId.toString())
+        );
+
+        const followers = (user.followers ?? []).map(u => ({
+            _id: u._id,
+            username: u.username,
+            fullname: u.fullname,
+            profileImage: u.profileImage ?? "",
+            followersCount: u.followersCount ?? 0,
+            isFollowing: myFollowingSet.has(u._id.toString())
+        }));
+
+        return res.status(200).json({ success: true, users: followers });
+    } catch (error) {
+        console.error("getFollowers error:", error);
+        return res.status(500).json({ success: false, message: "SERVER_ERROR" });
+    }
+};
+
+export const getFollowing = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const myId = req.user.userId;
+
+        const [user, me] = await Promise.all([
+            User.findById(id)
+                .select("following")
+                .populate("following", "username fullname profileImage followersCount")
+                .lean(),
+            User.findById(myId).select("following").lean()
+        ]);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "USER_NOT_FOUND" });
+        }
+
+        const myFollowingSet = new Set(
+            (me?.following ?? []).map(fId => fId.toString())
+        );
+
+        const following = (user.following ?? []).map(u => ({
+            _id: u._id,
+            username: u.username,
+            fullname: u.fullname,
+            profileImage: u.profileImage ?? "",
+            followersCount: u.followersCount ?? 0,
+            isFollowing: myFollowingSet.has(u._id.toString())
+        }));
+
+        return res.status(200).json({ success: true, users: following });
+    } catch (error) {
+        console.error("getFollowing error:", error);
+        return res.status(500).json({ success: false, message: "SERVER_ERROR" });
+    }
+};

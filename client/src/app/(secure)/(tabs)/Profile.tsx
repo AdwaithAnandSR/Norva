@@ -85,6 +85,26 @@ const Profile = () => {
                 postsCount={profile?.postsCount}
                 followingCount={profile?.followingCount}
                 followersCount={profile?.followersCount}
+                onFollowingPress={() =>
+                    router.push({
+                        pathname: "/FollowList",
+                        params: {
+                            id: profile?._id,
+                            initialTab: "following",
+                            username: profile?.username
+                        }
+                    })
+                }
+                onFollowersPress={() =>
+                    router.push({
+                        pathname: "/FollowList",
+                        params: {
+                            id: profile?._id,
+                            initialTab: "followers",
+                            username: profile?.username
+                        }
+                    })
+                }
             />
 
             {/* Edit + Create buttons */}

@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 
 import {
@@ -12,6 +12,8 @@ import { useApp } from "../../store/app.store.js";
 const setToast = useApp.getState().setToast;
 
 export const useFollow = userId => {
+    const qc = useQueryClient();
+
     // Select granular state slices to prevent unnecessary re-renders
     const isFollowing = useFollowStore(s => s.states[userId] ?? false);
     const setFollowing = useFollowStore(s => s.setFollowing);
@@ -44,6 +46,33 @@ export const useFollow = userId => {
                 decrementFollowing();
             }
 
+            // Optimistically update target user profile cache
+            qc.setQueryData(["profile", userId], old => {
+                if (!old?.user) return old;
+                const cur = old.user.followersCount ?? 0;
+                return {
+                    ...old,
+                    user: {
+                        ...old.user,
+                        followersCount: nextIsFollowing ? cur + 1 : Math.max(0, cur - 1),
+                        isFollowing: nextIsFollowing
+                    }
+                };
+            });
+
+            // Optimistically update "me" profile cache
+            qc.setQueryData(["profile", "me"], old => {
+                if (!old?.user) return old;
+                const cur = old.user.followingCount ?? 0;
+                return {
+                    ...old,
+                    user: {
+                        ...old.user,
+                        followingCount: nextIsFollowing ? cur + 1 : Math.max(0, cur - 1)
+                    }
+                };
+            });
+
             // Pass snapshot context to onError
             return { previousIsFollowing };
         },
@@ -61,6 +90,8 @@ export const useFollow = userId => {
             } else {
                 decrementFollowing();
             }
+
+            qc.invalidateQueries({ queryKey: ["profile"] });
         },
 
         onSuccess: res => {
@@ -68,6 +99,9 @@ export const useFollow = userId => {
             if (res?.success && typeof res.isFollowing === "boolean") {
                 setFollowing(userId, res.isFollowing);
             }
+            qc.invalidateQueries({ queryKey: ["profile"] });
+            qc.invalidateQueries({ queryKey: ["followers"] });
+            qc.invalidateQueries({ queryKey: ["following"] });
         }
     });
 

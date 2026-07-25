@@ -15,7 +15,10 @@ const UserSearchRow = ({ user, onPress, onRemove }) => {
             onPress={() => onPress(user)}
             className="flex-row items-center px-4 py-2.5"
         >
-            <InitialsAvatar fullname={user.fullname || user.username} />
+            <InitialsAvatar
+                fullname={user.fullname || user.username}
+                profileImage={user.profileImage}
+            />
 
             <View className="flex-1 ml-3">
                 <Text

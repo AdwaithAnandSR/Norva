@@ -229,7 +229,7 @@ const ReelCard = ({ post, isActive, pageHeight }) => {
                     </View>
                     <Text
                         onPress={() =>
-                            router.push(`/UserProfile/${author._id}`)
+                            router.push(`/(UserProfile)/${author._id}`)
                         }
                         className="text-white text-md"
                         style={{ fontFamily: "WinkyRoughExtraBold" }}

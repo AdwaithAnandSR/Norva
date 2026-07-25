@@ -66,7 +66,7 @@ const Search = () => {
     
     const handleSelectUser = (user: { _id: string }) => {
         addRecent.mutate(user._id);
-        router.push(`/UserProfile/${user._id}`);
+        router.push(`/(UserProfile)/${user._id}`);
     };
 
     const results = searchResults.data?.users ?? [];
