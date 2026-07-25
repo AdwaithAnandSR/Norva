@@ -39,10 +39,41 @@ const EditPost = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    const toHashtag = str =>
+        str
+            .trim()
+            .replace(/^#/, "")
+            .split(/\s+/)
+            .map(
+                word =>
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            )
+            .join("");
+
     const addTag = () => {
-        const cleaned = tagInput.trim().toLowerCase().replace(/^#/, "");
-        if (!cleaned || tags.includes(cleaned) || tags.length >= 6) return;
-        setTags(prev => [...prev, cleaned]);
+        const newTags = tagInput.includes("#")
+            ? // "#winter #fashion #winter vibes"
+              tagInput.match(/#([^\s#,][^#,\n]*)/g)?.map(tag => toHashtag(tag))
+            : // "winter fashion, fashion reel, editorial"
+              tagInput.split(",").map(toHashtag);
+
+        if (!newTags?.length) return;
+
+        setTags(prev => {
+            const result = [...prev];
+            const existing = new Set(prev);
+
+            for (const tag of newTags) {
+                if (result.length >= 10) break;
+                if (!existing.has(tag)) {
+                    existing.add(tag);
+                    result.push(tag);
+                }
+            }
+
+            return result;
+        });
+
         setTagInput("");
     };
 

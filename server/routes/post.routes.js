@@ -10,6 +10,7 @@ import {
     createFeed,
     getFeed,
     deletePost,
+    getReels,
     editPost,
     incrementViews
 } from "../controllers/feed/feed.js";
@@ -22,6 +23,7 @@ import {
 
 router.post("/create", createFeed);
 router.post("/getFeed", getFeed);
+router.post("/getReels", getReels);
 router.delete("/:id", deletePost);
 router.patch("/:id", editPost);
 router.post("/:id/view", incrementViews);

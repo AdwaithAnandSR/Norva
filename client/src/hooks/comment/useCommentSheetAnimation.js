@@ -20,9 +20,7 @@ export const useCommentSheetAnimation = visible => {
     const insets = useSafeAreaInsets();
 
     // 1. Tracks native keyboard frame height synchronously on UI thread
-    const keyboard = useAnimatedKeyboard({
-        isStatusBarTranslucentAndroid: true
-    });
+    const keyboard = useAnimatedKeyboard();
 
     useEffect(() => {
         if (visible) {

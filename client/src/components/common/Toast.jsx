@@ -57,18 +57,20 @@ const Toast = () => {
 
             <Animated.View
                 style={animatedStyle}
-                className="absolute top-0 left-0 z-50 w-full flex-row items-center justify-between bg-black px-10 pt-2 pb-1 rounded-b-2xl"
+                className="absolute top-0 left-0 z-50 w-full flex-row items-center justify-between bg-black pt-3 pb-1 rounded-b-2xl border border-b-[#4f4f4f67]"
             >
                 <Text
+                    numberOfLines={1}
                     // style={{ fontFamily: "LuckiestGuyRegular" }}
-                    className={`text-xl font-bold ${colorClass}`}
+                    className={`text-xl px-10 flex-1 text-left font-bold ${colorClass}`}
                 >
                     {left ?? toast}
                 </Text>
                 {right && (
                     <Text
+                        numberOfLines={1}
                         // style={{ fontFamily: "LuckiestGuyRegular" }}
-                        className={`text-xl font-bold ${colorClass}`}
+                        className={`text-xl px-10  flex-1 text-right font-bold ${colorClass}`}
                     >
                         {right}
                     </Text>

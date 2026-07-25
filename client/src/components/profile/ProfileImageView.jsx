@@ -6,6 +6,7 @@ import {
     TouchableOpacity
 } from "react-native";
 import { Image } from "expo-image";
+import { router } from "expo-router";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 import { useUser } from "../../store/user.store";
@@ -42,6 +43,15 @@ const ProfileImageView = () => {
                         borderRadius: IMAGE_SIZE / 2,
                         overflow: "hidden"
                     }}
+                    onPress={() =>
+                        router.push({
+                            pathname: "/FullScreenImage",
+                            params: {
+                                postId: "profile",
+                                uri: "../../../assets/images/IMG_20250716_130532.jpg"
+                            }
+                        })
+                    }
                     className="-mt-20 border-5 border-border"
                 >
                     <Image

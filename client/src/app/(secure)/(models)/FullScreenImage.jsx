@@ -8,13 +8,14 @@ import {
     Text
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
+import { useVideoPlayer } from "expo-video";
 import {
     Gesture,
     GestureDetector,
     GestureHandlerRootView
 } from "react-native-gesture-handler";
 import { BlurView, BlurTargetView } from "expo-blur";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -23,20 +24,25 @@ import Animated, {
     runOnJS
 } from "react-native-reanimated";
 
+import ReelPlayer from "../../../components/feed/ReelPlayer";
+
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 export default function ImageScreen() {
-    const { postId, uri } = useLocalSearchParams();
-    const [ratio, setRatio] = useState(1);
+    const {
+        postId,
+        uri,
+        mediaType = "image",
+        width,
+        height
+    } = useLocalSearchParams();
+
     const blurTargetRef = useRef(null);
 
-    useEffect(() => {
-        if (uri)
-            Image.getSize(uri, (width, height) => {
-                setRatio(width / height);
-            });
-    }, [uri]);
+    const [originalView, setOriginalView] = useState(false);
+
+    const ratio = width && height ? Number(width) / Number(height) : 1;
 
     const scale = useSharedValue(1);
     const savedScale = useSharedValue(1);
@@ -126,11 +132,10 @@ export default function ImageScreen() {
             >
                 <View
                     style={{
-                        position: "absolute",
                         top: 56,
-                        left: 18,
                         zIndex: 100
                     }}
+                    className="absolute px-4 w-full flex-row items-start justify-between"
                 >
                     <BlurView
                         blurTarget={blurTargetRef}
@@ -156,24 +161,93 @@ export default function ImageScreen() {
                             </Text>
                         </Pressable>
                     </BlurView>
+                    <View className="gap-5 justify-center">
+                        <BlurView
+                            blurTarget={blurTargetRef}
+                            blurMethod="dimezisBlurViewSdk31Plus"
+                            intensity={60}
+                            tint="dark"
+                            style={{
+                                borderRadius: 999,
+                                overflow: "hidden"
+                            }}
+                        >
+                            <Pressable
+                                onPress={() => setOriginalView(p => !p)}
+                                className="px-2 py-2 rounded-3xl flex-row justify-center items-center gap-1"
+                            >
+                                <MaterialIcons
+                                    name="fullscreen-exit"
+                                    size={24}
+                                    color="white"
+                                />
+                            </Pressable>
+                        </BlurView>
+                        <BlurView
+                            blurTarget={blurTargetRef}
+                            blurMethod="dimezisBlurViewSdk31Plus"
+                            intensity={60}
+                            tint="dark"
+                            style={{
+                                borderRadius: 999,
+                                overflow: "hidden"
+                            }}
+                        >
+                            <Pressable
+                                className="px-2 py-2 rounded-3xl flex-row justify-center items-center gap-1"
+                                hitSlop={10}
+                            >
+                                <Feather
+                                    name="more-horizontal"
+                                    size={24}
+                                    color="#fff"
+                                />
+                            </Pressable>
+                        </BlurView>
+                    </View>
                 </View>
 
                 {/* IMAGE */}
 
                 <View className="flex-1 justify-center items-center">
                     <GestureDetector gesture={gesture}>
-                        <AnimatedImage
-                            sharedTransitionTag={`image-${postId}`}
-                            source={{ uri }}
-                            resizeMode="contain"
-                            style={[
-                                {
-                                    width: "100%",
-                                    aspectRatio: ratio
-                                },
-                                animatedStyle
-                            ]}
-                        />
+                        {mediaType === "video" ? (
+                            <Animated.View
+                                style={[
+                                    {
+                                        width: "100%",
+                                        ...(originalView
+                                            ? { aspectRatio: ratio }
+                                            : { flex: 1 })
+                                    },
+                                    animatedStyle
+                                ]}
+                            >
+                                <ReelPlayer
+                                    uri={uri}
+                                    contentFit={
+                                        originalView ? "contain" : "cover"
+                                    }
+                                    style={{ flex: 1 }}
+                                    isActive={true}
+                                />
+                            </Animated.View>
+                        ) : (
+                            <AnimatedImage
+                                sharedTransitionTag={`image-${postId}`}
+                                source={{ uri }}
+                                resizeMode={originalView ? "contain" : "cover"}
+                                style={[
+                                    {
+                                        width: "100%",
+                                        ...(originalView
+                                            ? { aspectRatio: ratio }
+                                            : { flex: 1 })
+                                    },
+                                    animatedStyle
+                                ]}
+                            />
+                        )}
                     </GestureDetector>
                 </View>
             </BlurTargetView>

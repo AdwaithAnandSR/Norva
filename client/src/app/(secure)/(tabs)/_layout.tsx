@@ -1,5 +1,6 @@
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { useResolveClassNames } from "uniwind";
+import { useSegments } from "expo-router";
 
 export default function TabsLayout() {
     const {
@@ -10,8 +11,13 @@ export default function TabsLayout() {
         "bg-primary text-text-secondary border-card-selected"
     );
 
+    const currentRoute = useSegments().at(-1);
+    const hidden = currentRoute === "Feeds";
+
     return (
         <NativeTabs
+        disableAutomaticContentInsets
+            hidden={hidden}
             backgroundColor={backgroundColor}
             iconColor={iconColor}
             indicatorColor={indicatorColor}

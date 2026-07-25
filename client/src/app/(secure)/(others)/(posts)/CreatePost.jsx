@@ -6,6 +6,7 @@ import {
     TextInput,
     ScrollView
 } from "react-native";
+import { router } from "expo-router";
 
 import { buttonGlow, orangeGlow } from "@constants/style.js";
 import { pickImage } from "../../../../utils/imagePick.js";
@@ -82,6 +83,7 @@ const CreatePost = () => {
             descValue.current = "";
             tagsValue.current = "";
             setMessage("Successfully created new post");
+            router.back();
         } else setMessage("Failed to create post!");
 
         setUploadProgress(-1);

@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { Feather } from "@expo/vector-icons";
+import { Entypo, Feather } from "@expo/vector-icons";
 
 const { width: vw } = Dimensions.get("window");
 const TILE = (vw - 48) / 3; // 3 columns with padding
@@ -20,10 +20,15 @@ const PostTile = ({ post }) => (
             post.url &&
             router.push({
                 pathname: "/FullScreenImage",
-                params: { postId: post._id, uri: post.url }
+                params: {
+                    postId: post._id,
+                    uri: post.url,
+                    mediaType: post.mediaType,
+                    height: post.height,
+                    width: post.width
+                }
             })
         }
-        
         style={{
             width: TILE,
             height: TILE,
@@ -48,6 +53,14 @@ const PostTile = ({ post }) => (
                     {post.title || post.description}
                 </Text>
             </View>
+        )}
+        {post.mediaType === "video" && (
+            <Entypo
+                name="controller-play"
+                size={20}
+                color="white"
+                className="absolute top-1 left-1 rounded-full bg-[#37373793] p-1"
+            />
         )}
     </TouchableOpacity>
 );

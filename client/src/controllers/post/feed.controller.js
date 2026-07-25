@@ -1,4 +1,5 @@
 import api from "../../utils/axios.js";
+import * as Haptics from "expo-haptics";
 
 import { useApp } from "../../store/app.store.js";
 
@@ -22,7 +23,8 @@ export const createPost = async ({
         });
 
         setToast("green=>Created");
-
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        
         return true;
     } catch (error) {
         setToast("red=>Failed");
@@ -34,6 +36,14 @@ export const createPost = async ({
 
 export const fetchFeed = async ({ cursor = null, limit = 10 } = {}) => {
     const { data } = await api.post("/post/getFeed", {
+        cursor,
+        limit
+    });
+    return data; // { success, posts, nextCursor, hasMore }
+};
+
+export const fetchReels = async ({ cursor = null, limit = 6 } = {}) => {
+    const { data } = await api.post("/post/getReels", {
         cursor,
         limit
     });
