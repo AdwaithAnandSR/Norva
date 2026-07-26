@@ -9,10 +9,8 @@ import {
 import { useLocalSearchParams, router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 
-import {
-    useUserProfile,
-    useUserPosts
-} from "../../../../hooks/user/useProfileQuery.js";
+import { useUserProfile, useUserPosts } from "../../../../hooks/user/useProfileQuery.js";
+import { useAccessConversation } from "../../../../hooks/chat/useChatQuery.js";
 import { useUser } from "../../../../store/user.store.js";
 import { useFollowStore } from "../../../../store/follow.store.js";
 
@@ -29,6 +27,24 @@ const UserProfile = () => {
 
     const profileQuery = useUserProfile(id);
     const postsQuery = useUserPosts(id);
+    const accessConvMutation = useAccessConversation();
+
+    const handleMessage = () => {
+        if (!id) return;
+        accessConvMutation.mutate(id, {
+            onSuccess: (res) => {
+                if (res?.success && res?.conversation?._id) {
+                    router.push({
+                        pathname: "/chats/[id]",
+                        params: {
+                            id: res.conversation._id,
+                            user: JSON.stringify(profile)
+                        }
+                    });
+                }
+            }
+        });
+    };
 
     const profile = profileQuery.data?.user;
     const posts = postsQuery.data?.pages.flatMap(p => p.posts) ?? [];
@@ -127,8 +143,21 @@ const UserProfile = () => {
                 </Text>
 
                 {profile._id !== myId && (
-                    <View style={{ marginTop: 14 }}>
+                    <View className="flex-row items-center space-x-3 mt-4">
                         <FollowButton userId={profile._id} />
+                        <TouchableOpacity
+                            onPress={handleMessage}
+                            disabled={accessConvMutation.isPending}
+                            className="bg-card-selected px-5 py-2.5 rounded-full border border-btn/30 flex-row items-center"
+                        >
+                            <Feather name="message-square" size={16} color="#6437ff" />
+                            <Text
+                                style={{ fontFamily: "SpaceMono" }}
+                                className="text-text font-bold text-xs ml-2"
+                            >
+                                Message
+                            </Text>
+                        </TouchableOpacity>
                     </View>
                 )}
             </View>

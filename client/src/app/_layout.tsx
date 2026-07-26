@@ -4,10 +4,12 @@ import { Stack } from "expo-router";
 import { View } from "react-native";
 import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 
+import React, { useEffect } from "react";
 import { useUser } from "../store/user.store.js";
 import Toast from "../components/common/Toast.jsx";
+import { connectSocket } from "../utils/socket.js";
 
 const client = new QueryClient({
     defaultOptions: {
@@ -21,8 +23,76 @@ const client = new QueryClient({
     }
 });
 
+const SocketInitializer = () => {
+    const userId = useUser(state => state.userId);
+    const queryClient = useQueryClient();
+
+    useEffect(() => {
+        if (userId) {
+            const socket = connectSocket();
+
+            const handleNewNotification = ({ conversationId, message }: any) => {
+                if (!message) return;
+                queryClient.setQueryData(["conversations"], (old: any) => {
+                    if (!old?.conversations) return old;
+                    const senderId = typeof message.sender === "string" ? message.sender : message.sender?._id;
+                    const isFromOther = senderId !== userId;
+
+                    let updatedConv: any = null;
+                    const otherConvs = old.conversations.filter((c: any) => {
+                        if (c._id === conversationId) {
+                            updatedConv = {
+                                ...c,
+                                lastMessage: message,
+                                updatedAt: message.createdAt || new Date().toISOString(),
+                                unreadCountForMe: isFromOther ? (c.unreadCountForMe || 0) + 1 : (c.unreadCountForMe || 0)
+                            };
+                            return false;
+                        }
+                        return true;
+                    });
+
+                    if (!updatedConv) return old;
+                    return {
+                        ...old,
+                        conversations: [updatedConv, ...otherConvs]
+                    };
+                });
+            };
+
+            const handleUnreadUpdate = ({ conversationId, readBy }: any) => {
+                queryClient.setQueryData(["conversations"], (old: any) => {
+                    if (!old?.conversations) return old;
+                    return {
+                        ...old,
+                        conversations: old.conversations.map((c: any) => {
+                            if (c._id === conversationId) {
+                                return {
+                                    ...c,
+                                    unreadCountForMe: readBy === userId ? 0 : c.unreadCountForMe
+                                };
+                            }
+                            return c;
+                        })
+                    };
+                });
+            };
+
+            socket.on("new_message_notification", handleNewNotification);
+            socket.on("unread_count_updated", handleUnreadUpdate);
+
+            return () => {
+                socket.off("new_message_notification", handleNewNotification);
+                socket.off("unread_count_updated", handleUnreadUpdate);
+            };
+        }
+    }, [userId, queryClient]);
+
+    return null;
+};
+
 const Layout = () => {
-    const isLoggedIn = useUser(state => state.isLoggedIn());
+    const isLoggedIn = useUser(state => !!state.userId);
 
     return (
         <Stack
@@ -69,6 +139,7 @@ export default function RootLayout() {
         >
             <StatusBar style="auto" translucent animated />
             <QueryClientProvider client={client}>
+                <SocketInitializer />
                 <Layout />
             </QueryClientProvider>
             <Toast />
