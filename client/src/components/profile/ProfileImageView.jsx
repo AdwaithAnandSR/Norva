@@ -10,6 +10,7 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 
 import { useUser } from "../../store/user.store";
+import InitialsAvatar from "../search/InitialsAvatar.jsx";
 
 const blurhash = "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azay";
 
@@ -32,13 +33,12 @@ const ProfileImageView = ({
     const storeProfileImage = useUser(state => state.profileImage);
     const storeBackgroundImage = useUser(state => state.backgroundImage);
 
-    const fullname = propFullname ?? storeFullname;
-    const username = propUsername ?? storeUsername;
-    const profileImage = propProfileImage ?? storeProfileImage;
-    const backgroundImage = propBackgroundImage ?? storeBackgroundImage;
+    const fullname = propFullname !== undefined ? propFullname : storeFullname;
+    const username = propUsername !== undefined ? propUsername : storeUsername;
+    const profileImage = propProfileImage !== undefined ? propProfileImage : storeProfileImage;
+    const backgroundImage = propBackgroundImage !== undefined ? propBackgroundImage : storeBackgroundImage;
 
     const coverSource = backgroundImage ? { uri: backgroundImage } : DEFAULT_COVER;
-    const avatarSource = profileImage ? { uri: profileImage } : DEFAULT_AVATAR;
 
     const handleAvatarPress = () => {
         const avatarUri = profileImage || RNImage.resolveAssetSource(DEFAULT_AVATAR).uri;
@@ -88,25 +88,32 @@ const ProfileImageView = ({
                     onPress={handleAvatarPress}
                     className="-mt-20 border-5 border-border"
                 >
-                    <Image
-                        source={avatarSource}
-                        style={{
-                            width: "100%",
-                            height: "100%"
-                        }}
-                        placeholder={{ blurhash }}
-                        contentFit="cover"
-                        transition={1000}
-                    />
+                    {profileImage ? (
+                        <Image
+                            source={{ uri: profileImage }}
+                            style={{
+                                width: "100%",
+                                height: "100%"
+                            }}
+                            placeholder={{ blurhash }}
+                            contentFit="cover"
+                            transition={1000}
+                        />
+                    ) : (
+                        <InitialsAvatar
+                            fullname={fullname || username}
+                            size={IMAGE_SIZE}
+                        />
+                    )}
                 </TouchableOpacity>
 
                 <Text
                     numberOfLines={1}
                     adjustsFontSizeToFit
                     style={styles.nameText}
-                    className="text-text-secondary text-3xl"
+                    className="text-text-secondary text-3xl mt-2"
                 >
-                    {fullname}
+                    {fullname || username}
                 </Text>
                 <Text className="text-text/60 font-semibold text-lg">
                     @{username}

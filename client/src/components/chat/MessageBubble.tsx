@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { MaterialIcons } from "@expo/vector-icons";
 
 const blurhash = "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azay";
@@ -100,7 +101,20 @@ const MessageBubble = ({
                         contentFit="cover"
                     />
 
-                    <View className="absolute bottom-2 right-2 bg-black/60 px-2 py-1 rounded-full flex-row items-center space-x-1">
+                    {/* Dark Vignette Overlay */}
+                    <LinearGradient
+                        colors={["rgba(0,0,0,0.25)", "transparent", "rgba(0,0,0,0.55)"]}
+                        locations={[0, 0.4, 1]}
+                        style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0
+                        }}
+                    />
+
+                    <View className="absolute bottom-2 right-2 bg-black/60 px-2.5 py-1 rounded-full flex-row items-center space-x-1">
                         <Text className="text-white/90 text-[10px] mr-1">
                             {formatTime(item.createdAt)}
                         </Text>
@@ -111,50 +125,94 @@ const MessageBubble = ({
         );
     }
 
+    // Text Only Messages
+    if (!item.image) {
+        return (
+            <View
+                className={`my-1 max-w-[80%] ${
+                    isMe ? "self-end items-end" : "self-start items-start"
+                }`}
+            >
+                <View
+                    className={`px-4 py-2.5 rounded-2xl ${
+                        isMe
+                            ? "bg-btn rounded-tr-xs"
+                            : "bg-card-selected rounded-tl-xs border border-white/10"
+                    }`}
+                >
+                    <Text className="text-white text-base leading-5 font-normal">
+                        {item.text}
+                    </Text>
+                    <View className="flex-row items-center justify-end mt-1 self-end space-x-1">
+                        <Text className="text-white/60 text-[10px] mr-1">
+                            {formatTime(item.createdAt)}
+                        </Text>
+                        {isMe && getStatusIcon()}
+                    </View>
+                </View>
+            </View>
+        );
+    }
+
+    // Image + Text Messages
     return (
         <View
             className={`my-1 max-w-[80%] ${
                 isMe ? "self-end items-end" : "self-start items-start"
             }`}
         >
-            <View
-                className={`px-4 py-3 rounded-2xl ${
-                    isMe
-                        ? "bg-btn rounded-tr-xs"
-                        : "bg-card-selected rounded-tl-xs border border-white/10"
+            <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => onPreviewImage(item.image)}
+                className={`w-[240px] rounded-2xl overflow-hidden shadow-md relative ${
+                    isMe ? "rounded-tr-xs" : "rounded-tl-xs border border-white/10"
                 }`}
             >
-                {item.image ? (
-                    <TouchableOpacity
-                        activeOpacity={0.9}
-                        onPress={() => onPreviewImage(item.image)}
-                        className="mb-2 rounded-xl overflow-hidden"
-                    >
-                        <Image
-                            source={{ uri: item.image }}
-                            style={{
-                                width: 220,
-                                height: 180
-                            }}
-                            placeholder={{ blurhash }}
-                            contentFit="cover"
-                        />
-                    </TouchableOpacity>
-                ) : null}
+                {/* Full Background Image */}
+                <Image
+                    source={{ uri: item.image }}
+                    style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        width: "100%",
+                        height: "100%"
+                    }}
+                    placeholder={{ blurhash }}
+                    contentFit="cover"
+                />
 
-                {item.text ? (
-                    <Text className="text-white text-base leading-5 font-normal">
+                {/* Subtle Top Gradient */}
+                <LinearGradient
+                    colors={["rgba(0,0,0,0.25)", "transparent"]}
+                    style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: 50
+                    }}
+                />
+
+                {/* Top Image Preview Area */}
+                <View style={{ height: 130 }} />
+
+                {/* Text & Metadata Container with Compact 70% Dark Background Transparency */}
+                <View className="px-3 pt-1.5 pb-1 bg-black/70 rounded-t-md">
+                    <Text className="text-white text-base leading-5 font-normal shadow-sm">
                         {item.text}
                     </Text>
-                ) : null}
 
-                <View className="flex-row items-center justify-end mt-1 self-end space-x-1">
-                    <Text className="text-white/60 text-[10px] mr-1">
-                        {formatTime(item.createdAt)}
-                    </Text>
-                    {isMe && getStatusIcon()}
+                    <View className="flex-row items-center justify-end mt-0.5 self-end space-x-1">
+                        <Text className="text-white/80 text-[10px] mr-1">
+                            {formatTime(item.createdAt)}
+                        </Text>
+                        {isMe && getStatusIcon()}
+                    </View>
                 </View>
-            </View>
+            </TouchableOpacity>
         </View>
     );
 };

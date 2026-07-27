@@ -10,6 +10,7 @@ import React, { useEffect } from "react";
 import { useUser } from "../store/user.store.js";
 import Toast from "../components/common/Toast.jsx";
 import { connectSocket } from "../utils/socket.js";
+import { usePushNotifications } from "../utils/notification";
 
 const client = new QueryClient({
     defaultOptions: {
@@ -26,6 +27,8 @@ const client = new QueryClient({
 const SocketInitializer = () => {
     const userId = useUser(state => state.userId);
     const queryClient = useQueryClient();
+
+    usePushNotifications(userId);
 
     useEffect(() => {
         if (userId) {

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { View, KeyboardAvoidingView, Platform, Text, TouchableOpacity } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -394,17 +394,28 @@ const ChatRoom = () => {
         );
     }, [messagesQuery.isFetchingNextPage]);
 
+    const handlePreviewImage = useCallback((url: string) => {
+        if (!url) return;
+        router.push({
+            pathname: "/FullScreenImage",
+            params: {
+                postId: "chat_image",
+                uri: url
+            }
+        });
+    }, []);
+
     const renderItem = useCallback(
         ({ item }: { item: Message }) => (
             <MessageBubble
                 item={item}
                 myId={myId}
                 recipientId={recipientId}
-                onPreviewImage={setPreviewImage}
+                onPreviewImage={handlePreviewImage}
                 onRetryMessage={handleRetryMessage}
             />
         ),
-        [myId, recipientId, setPreviewImage, handleRetryMessage]
+        [myId, recipientId, handlePreviewImage, handleRetryMessage]
     );
 
     return (

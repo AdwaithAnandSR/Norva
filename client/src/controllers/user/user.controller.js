@@ -24,3 +24,8 @@ export const getFollowing = async userId => {
     const { data } = await api.get(`/user/${userId}/following`);
     return data; // { success, users }
 };
+
+export const updatePushTokenApi = async pushToken => {
+    const { data } = await api.post("/user/push-token", { pushToken });
+    return data; // { success, message }
+};

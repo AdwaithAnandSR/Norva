@@ -14,7 +14,7 @@ import { useAccessConversation } from "../../../../hooks/chat/useChatQuery.js";
 import { useUser } from "../../../../store/user.store.js";
 import { useFollowStore } from "../../../../store/follow.store.js";
 
-import InitialsAvatar from "../../../../components/search/InitialsAvatar.jsx";
+import ProfileImageView from "../../../../components/profile/ProfileImageView.jsx";
 import ProfileActivityView from "../../../../components/profile/ProfileActivityView.jsx";
 import PostsGrid from "../../../../components/profile/PostGrid.jsx";
 import FollowButton from "../../../../components/feed/FollowButton.jsx";
@@ -107,60 +107,45 @@ const UserProfile = () => {
                 />
             }
         >
-            {/* Header */}
-            <View
-                className="flex-row items-center justify-between px-4"
-                style={{ marginTop: 56, marginBottom: 20 }}
-            >
-                <TouchableOpacity onPress={() => router.back()} hitSlop={10}>
-                    <Feather name="arrow-left" size={22} color="#c4c4e0" />
-                </TouchableOpacity>
-                <Text
-                    numberOfLines={1}
-                    className="text-text"
-                    style={{ fontFamily: "WinkyRoughExtraBold", fontSize: 16 }}
-                >
-                    @{profile.username}
-                </Text>
-                <View style={{ width: 22 }} />
-            </View>
-
-            {/* Identity */}
-            <View className="items-center px-6" style={{ marginBottom: 20 }}>
-                <InitialsAvatar
+            {/* Header Cover + Avatar */}
+            <View className="relative">
+                <ProfileImageView
+                    profileImage={profile.profileImage}
+                    backgroundImage={profile.backgroundImage}
                     fullname={profile.fullname || profile.username}
-                    size={84}
+                    username={profile.username}
                 />
-                <Text
-                    numberOfLines={1}
-                    className="text-text-secondary mt-3"
-                    style={{ fontFamily: "WinkyRoughExtraBold", fontSize: 22 }}
-                >
-                    {profile.fullname || profile.username}
-                </Text>
-                <Text className="text-text/60 font-semibold text-base">
-                    @{profile.username}
-                </Text>
 
-                {profile._id !== myId && (
-                    <View className="flex-row items-center space-x-3 mt-4">
-                        <FollowButton userId={profile._id} />
-                        <TouchableOpacity
-                            onPress={handleMessage}
-                            disabled={accessConvMutation.isPending}
-                            className="bg-card-selected px-5 py-2.5 rounded-full border border-btn/30 flex-row items-center"
-                        >
-                            <Feather name="message-square" size={16} color="#6437ff" />
-                            <Text
-                                style={{ fontFamily: "SpaceMono" }}
-                                className="text-text font-bold text-xs ml-2"
-                            >
-                                Message
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
+                {/* Floating Back Button */}
+                <TouchableOpacity
+                    onPress={() => router.back()}
+                    hitSlop={10}
+                    style={{ position: "absolute", top: 48, left: 16, zIndex: 30 }}
+                    className="bg-black/50 p-2 rounded-full border border-white/20"
+                >
+                    <Feather name="arrow-left" size={20} color="#ffffff" />
+                </TouchableOpacity>
             </View>
+
+            {/* Follow & Message Buttons */}
+            {profile._id !== myId && (
+                <View className="flex-row items-center justify-center space-x-3 px-6 mt-4 mb-2">
+                    <FollowButton userId={profile._id} />
+                    <TouchableOpacity
+                        onPress={handleMessage}
+                        disabled={accessConvMutation.isPending}
+                        className="bg-card-selected px-5 py-2.5 rounded-full border border-btn/30 flex-row items-center"
+                    >
+                        <Feather name="message-square" size={16} color="#6437ff" />
+                        <Text
+                            style={{ fontFamily: "SpaceMono" }}
+                            className="text-text font-bold text-xs ml-2"
+                        >
+                            Message
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            )}
 
             <ProfileActivityView
                 postsCount={profile.postsCount}
