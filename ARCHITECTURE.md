@@ -116,7 +116,8 @@ Norva/
     │   ├── user.routes.js      # User profile & search operations (`/user`)
     │   └── file.routes.js      # File upload endpoints (`/file`)
     ├── services/               # Background & real-time services
-    │   └── socket.service.js   # Socket.io connection & event handling
+    │   ├── socket.service.js   # Socket.io connection & event handling
+    │   └── notification.service.js # Expo Push Notification service (messages, follows, likes, comments)
     ├── utils/                  # Utility functions
     │   ├── genToken.js         # JWT generation helpers (Access/Refresh tokens)
     │   ├── secureApi.js        # Standardized API response formatter

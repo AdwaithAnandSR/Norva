@@ -152,3 +152,32 @@ export const getUserProfile = async (req, res) => {
         return res.status(500).json({ success: false });
     }
 };
+
+export const updatePushToken = async (req, res) => {
+    try {
+        const myId = req.user.userId;
+        const { pushToken } = req.body;
+
+        if (!pushToken) {
+            return res.status(400).json({ success: false, message: "PUSH_TOKEN_REQUIRED" });
+        }
+
+        const user = await User.findById(myId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "USER_NOT_FOUND" });
+        }
+
+        user.expoPushToken = pushToken;
+        if (!user.pushTokens) user.pushTokens = [];
+        if (!user.pushTokens.includes(pushToken)) {
+            user.pushTokens.push(pushToken);
+        }
+        await user.save();
+
+        return res.status(200).json({ success: true, message: "PUSH_TOKEN_UPDATED" });
+    } catch (error) {
+        console.error("updatePushToken error:", error);
+        return res.status(500).json({ success: false });
+    }
+};
+

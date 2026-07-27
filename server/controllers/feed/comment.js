@@ -1,5 +1,6 @@
 import Comment from "../../models/comment.models.js";
 import Post from "../../models/post.models.js";
+import { sendCommentNotification } from "../../services/notification.service.js";
 
 export const getComments = async (req, res) => {
     try {
@@ -96,6 +97,31 @@ export const comment = async (req, res) => {
 
         // Return populated comment
         const populated = await comment.populate("userId", "username fullname profileImage");
+
+        const commenterName = populated.userId?.fullname || populated.userId?.username;
+        const myId = req.user.userId;
+
+        // Send push notification to post author if not self
+        if (post.userId && post.userId.toString() !== myId) {
+            sendCommentNotification({
+                recipientId: post.userId,
+                commenterName,
+                commentText: content,
+                postId,
+                commentId: comment._id
+            }).catch(err => console.error("Comment push notification error:", err));
+        }
+
+        // Send push notification to parent comment author if replying to a comment and parent author is different from post author & commenter
+        if (parent && parent.userId && parent.userId.toString() !== myId && parent.userId.toString() !== post.userId?.toString()) {
+            sendCommentNotification({
+                recipientId: parent.userId,
+                commenterName,
+                commentText: content,
+                postId,
+                commentId: comment._id
+            }).catch(err => console.error("Reply push notification error:", err));
+        }
 
         return res.status(201).json({ success: true, comment: populated });
     } catch (error) {

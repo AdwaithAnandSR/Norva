@@ -5,6 +5,7 @@ import {
     emitToConversation,
     emitToUser
 } from "../../services/socket.service.js";
+import { sendNewMessageNotification } from "../../services/notification.service.js";
 
 // Access or create a 1-on-1 direct conversation with target user
 export const accessConversation = async (req, res) => {
@@ -305,15 +306,26 @@ export const sendMessage = async (req, res) => {
             }
         });
 
+        const recipientIds = [];
         conversation.participants.forEach(participantId => {
             const pStr = participantId.toString();
             if (pStr !== myId) {
+                recipientIds.push(pStr);
                 emitToUser(pStr, "new_message_notification", {
                     conversationId,
                     message: messageObj
                 });
             }
         });
+
+        if (recipientIds.length > 0) {
+            sendNewMessageNotification({
+                recipientIds,
+                senderName: newMessage.sender?.fullname || newMessage.sender?.username,
+                messageText: text,
+                conversationId
+            }).catch(err => console.error("Message push notification error:", err));
+        }
 
         return res.status(201).json({
             success: true,

@@ -1,4 +1,5 @@
 import User from "../../models/user.models.js";
+import { sendFollowNotification } from "../../services/notification.service.js";
 
 export const followUser = async (req, res) => {
     try {
@@ -34,6 +35,12 @@ export const followUser = async (req, res) => {
         target.followersCount = target.followers.length;
 
         await Promise.all([me.save(), target.save()]);
+
+        sendFollowNotification({
+            recipientId: targetId,
+            followerName: me.fullname || me.username,
+            followerId: myId
+        }).catch(err => console.error("Follow notification error:", err));
 
         return res.status(200).json({
             success: true,

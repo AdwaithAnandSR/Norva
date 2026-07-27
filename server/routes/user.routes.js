@@ -11,7 +11,8 @@ import {
     getMyProfile,
     getUserPosts,
     updateProfile,
-    getUserProfile
+    getUserProfile,
+    updatePushToken
 } from "../controllers/user/profile.controller.js";
 import {
     searchUsers,
@@ -25,6 +26,7 @@ const router = Router();
 
 router.get("/me", getMyProfile);
 router.patch("/me", updateProfile);
+router.post("/push-token", updatePushToken);
 router.get("/me/posts", (req, res) => {
     req.params.id = req.user.userId;
     getUserPosts(req, res);

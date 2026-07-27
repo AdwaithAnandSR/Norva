@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import chalk from "chalk";
 import Message from "../models/message.models.js";
 import Conversation from "../models/conversation.models.js";
+import { sendNewMessageNotification } from "./notification.service.js";
 
 let io;
 
@@ -166,16 +167,27 @@ export const initIo = server => {
                         }
                     });
 
-                    // Notify other participants via their user room
+                    // Notify other participants via their user room & push notification
+                    const recipientIds = [];
                     conversation.participants.forEach(participantId => {
                         const pStr = participantId.toString();
                         if (pStr !== senderId) {
+                            recipientIds.push(pStr);
                             io.to(`user:${pStr}`).emit("new_message_notification", {
                                 conversationId,
                                 message: messageObj
                             });
                         }
                     });
+
+                    if (recipientIds.length > 0) {
+                        sendNewMessageNotification({
+                            recipientIds,
+                            senderName: newMessage.sender?.fullname || newMessage.sender?.username,
+                            messageText: text,
+                            conversationId
+                        }).catch(err => console.error("Socket message push notification error:", err));
+                    }
 
                     // ACK returns only success confirmation (no message payload)
                     if (typeof callback === "function") {

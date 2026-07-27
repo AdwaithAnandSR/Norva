@@ -39,7 +39,11 @@ const userSchema = mongoose.Schema(
                 user: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
                 searchedAt: { type: Date, default: Date.now }
             }
-        ]
+        ],
+
+        // Expo push notifications token storage
+        expoPushToken: { type: String, default: "" },
+        pushTokens: [{ type: String }]
     },
     {
         timestamps: true
