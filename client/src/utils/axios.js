@@ -4,7 +4,7 @@ import { storage, storeSession, revokeSession } from "../storage/storage.js";
 
 import { useUser } from "../store/user.store.js";
 
-const API_URL = "http://192.0.0.2:3000";
+const API_URL = "https://norva-ten.vercel.app";
 
 const api = axios.create({
     baseURL: API_URL,

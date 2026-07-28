@@ -111,7 +111,6 @@ export function usePushNotifications(userId?: string) {
             });
 
         return () => {
-            notificationListener.remove();
             responseListener.remove();
         };
     }, [userId]);
