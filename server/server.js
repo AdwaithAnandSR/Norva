@@ -29,6 +29,14 @@ app.use(
         origin: "*"
     })
 );
+
+app.get("/", (req, res) => {
+    res.json({
+        status: "ok",
+        message: "Norva Server API is running 🍄"
+    });
+});
+
 app.use("/auth", AuthRoutes);
 app.use(isAuthenticated);
 app.use("/post", PostRoutes);
@@ -36,6 +44,10 @@ app.use("/file", FileRoutes);
 app.use("/user", UserRoutes);
 app.use("/chat", ChatRoutes);
 
-server.listen(PORT, () =>
-    console.log(chalk.hex("#2ef8ad")(`app started at port ${PORT} 🍄`))
-);
+if (!process.env.VERCEL) {
+    server.listen(PORT, () =>
+        console.log(chalk.hex("#2ef8ad")(`app started at port ${PORT} 🍄`))
+    );
+}
+
+export default app;
