@@ -3,7 +3,7 @@ import { Image } from "expo-image";
 
 const blurhash = "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azay";
 
-const InitialsAvatar = ({ fullname, profileImage, size = 44 }) => {
+const InitialsAvatar = ({ fullname, username, profileImage, size = 44 }) => {
     if (profileImage) {
         return (
             <Image
@@ -16,6 +16,8 @@ const InitialsAvatar = ({ fullname, profileImage, size = 44 }) => {
         );
     }
 
+    const initial = (username || fullname)?.[0]?.toUpperCase() ?? "?";
+
     return (
         <View
             className="items-center justify-center rounded-full bg-card-selected border border-btn/20"
@@ -25,7 +27,7 @@ const InitialsAvatar = ({ fullname, profileImage, size = 44 }) => {
                 className="text-btn"
                 style={{ fontFamily: "WinkyRoughExtraBold", fontSize: size * 0.4 }}
             >
-                {fullname?.[0]?.toUpperCase() ?? "?"}
+                {initial}
             </Text>
         </View>
     );

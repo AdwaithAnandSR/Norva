@@ -3,8 +3,7 @@ import {
     Text,
     StyleSheet,
     Dimensions,
-    TouchableOpacity,
-    Image as RNImage
+    TouchableOpacity
 } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -18,9 +17,6 @@ const { width: vw } = Dimensions.get("window");
 
 const IMAGE_SIZE = vw * 0.3;
 const COVER_HEIGHT = vw * 0.65;
-
-const DEFAULT_COVER = require("../../../assets/images/file_0000000046c07209a8ba2a5c37b608af.png");
-const DEFAULT_AVATAR = require("../../../assets/images/IMG_20250716_130532.jpg");
 
 const ProfileImageView = ({
     profileImage: propProfileImage,
@@ -38,43 +34,54 @@ const ProfileImageView = ({
     const profileImage = propProfileImage !== undefined ? propProfileImage : storeProfileImage;
     const backgroundImage = propBackgroundImage !== undefined ? propBackgroundImage : storeBackgroundImage;
 
-    const coverSource = backgroundImage ? { uri: backgroundImage } : DEFAULT_COVER;
-
     const handleAvatarPress = () => {
-        const avatarUri = profileImage || RNImage.resolveAssetSource(DEFAULT_AVATAR).uri;
+        if (!profileImage) return;
         router.push({
             pathname: "/FullScreenImage",
             params: {
                 postId: "profile",
-                uri: avatarUri
+                uri: profileImage
             }
         });
     };
 
     const handleCoverPress = () => {
-        const coverUri = backgroundImage || RNImage.resolveAssetSource(DEFAULT_COVER).uri;
+        if (!backgroundImage) return;
         router.push({
             pathname: "/FullScreenImage",
             params: {
                 postId: "profile_cover",
-                uri: coverUri
+                uri: backgroundImage
             }
         });
     };
 
     return (
         <View>
-            <TouchableOpacity activeOpacity={0.95} onPress={handleCoverPress}>
-                <Image
-                    source={coverSource}
-                    style={{
-                        width: "100%",
-                        height: COVER_HEIGHT
-                    }}
-                    placeholder={{ blurhash }}
-                    contentFit="cover"
-                    transition={1000}
-                />
+            <TouchableOpacity
+                activeOpacity={backgroundImage ? 0.95 : 1}
+                onPress={handleCoverPress}
+            >
+                {backgroundImage ? (
+                    <Image
+                        source={{ uri: backgroundImage }}
+                        style={{
+                            width: "100%",
+                            height: COVER_HEIGHT
+                        }}
+                        placeholder={{ blurhash }}
+                        contentFit="cover"
+                        transition={1000}
+                    />
+                ) : (
+                    <View
+                        style={{
+                            width: "100%",
+                            height: COVER_HEIGHT,
+                            backgroundColor: "#1a1a2e"
+                        }}
+                    />
+                )}
             </TouchableOpacity>
 
             <View className="-mt-8 rounded-t-2xl bg-primary pl-5 ">
@@ -87,6 +94,7 @@ const ProfileImageView = ({
                     }}
                     onPress={handleAvatarPress}
                     className="-mt-20 border-5 border-border"
+                    activeOpacity={profileImage ? 0.85 : 1}
                 >
                     {profileImage ? (
                         <Image
@@ -101,7 +109,7 @@ const ProfileImageView = ({
                         />
                     ) : (
                         <InitialsAvatar
-                            fullname={fullname || username}
+                            fullname={username}
                             size={IMAGE_SIZE}
                         />
                     )}

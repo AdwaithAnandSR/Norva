@@ -21,9 +21,7 @@ import { pickImage } from "../../../utils/imagePick.js";
 import { uploadToCloudinary } from "../../../utils/cloudinary.js";
 
 import Loader from "../../../components/common/Loader.tsx";
-
-const DEFAULT_COVER = require("../../../../assets/images/file_0000000046c07209a8ba2a5c37b608af.png");
-const DEFAULT_AVATAR = require("../../../../assets/images/IMG_20250716_130532.jpg");
+import InitialsAvatar from "../../../components/search/InitialsAvatar.jsx";
 
 const EditProfile = () => {
     const storedFullname = useUser(s => s.fullname);
@@ -275,15 +273,13 @@ const EditProfile = () => {
                             borderColor: "rgba(100,55,255,0.2)"
                         }}
                     >
-                        <Image
-                            source={
-                                backgroundImagePreview
-                                    ? { uri: backgroundImagePreview }
-                                    : DEFAULT_COVER
-                            }
-                            style={{ width: "100%", height: "100%" }}
-                            contentFit="cover"
-                        />
+                        {backgroundImagePreview ? (
+                            <Image
+                                source={{ uri: backgroundImagePreview }}
+                                style={{ width: "100%", height: "100%" }}
+                                contentFit="cover"
+                            />
+                        ) : null}
                         <View
                             style={{
                                 position: "absolute",
@@ -374,15 +370,18 @@ const EditProfile = () => {
                                 position: "relative"
                             }}
                         >
-                            <Image
-                                source={
-                                    profileImagePreview
-                                        ? { uri: profileImagePreview }
-                                        : DEFAULT_AVATAR
-                                }
-                                style={{ width: "100%", height: "100%" }}
-                                contentFit="cover"
-                            />
+                            {profileImagePreview ? (
+                                <Image
+                                    source={{ uri: profileImagePreview }}
+                                    style={{ width: "100%", height: "100%" }}
+                                    contentFit="cover"
+                                />
+                            ) : (
+                                <InitialsAvatar
+                                    fullname={username}
+                                    size={88}
+                                />
+                            )}
                             <View
                                 style={{
                                     position: "absolute",
