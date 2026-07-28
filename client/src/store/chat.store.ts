@@ -107,6 +107,16 @@ export const useChatStore = create<ChatState>((set) => ({
             const existing = state.messagesByConversation[conversationId] || [];
             const fetched = fetchedMessages || [];
 
+            if (fetched.length === 0) {
+                const temps = existing.filter((m) => m.isTemp);
+                return {
+                    messagesByConversation: {
+                        ...state.messagesByConversation,
+                        [conversationId]: temps
+                    }
+                };
+            }
+
             if (existing.length === 0) {
                 return {
                     messagesByConversation: {
@@ -120,11 +130,6 @@ export const useChatStore = create<ChatState>((set) => ({
             const map = new Map<string, Message>();
             fetched.forEach((m) => {
                 if (m._id) map.set(m._id, m);
-            });
-            existing.forEach((m) => {
-                if (!m.isTemp && m._id && !map.has(m._id)) {
-                    map.set(m._id, m);
-                }
             });
 
             const mergedReal = Array.from(map.values()).sort((a, b) => {
@@ -572,9 +577,22 @@ export const useChatStore = create<ChatState>((set) => ({
 
     clearConversation: (conversationId) =>
         set((state) => {
-            if (!state.messagesByConversation[conversationId]) return state;
-            const newMessages = { ...state.messagesByConversation };
-            delete newMessages[conversationId];
-            return { messagesByConversation: newMessages };
+            const updatedConvs = state.conversations.map((c) => {
+                if (c._id === conversationId) {
+                    return {
+                        ...c,
+                        lastMessage: undefined,
+                        updatedAt: new Date().toISOString()
+                    };
+                }
+                return c;
+            });
+            return {
+                messagesByConversation: {
+                    ...state.messagesByConversation,
+                    [conversationId]: []
+                },
+                conversations: updatedConvs
+            };
         })
 }));

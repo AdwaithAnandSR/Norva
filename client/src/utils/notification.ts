@@ -20,8 +20,10 @@ Notifications.setNotificationHandler({
  */
 export async function registerForPushNotificationsAsync() {
     let token = null;
+    console.log("[PushNotification] Starting registerForPushNotificationsAsync...");
 
     if (Platform.OS === "android") {
+        console.log("[PushNotification] Setting Android notification channel 'default'...");
         await Notifications.setNotificationChannelAsync("default", {
             name: "default",
             importance: Notifications.AndroidImportance.MAX,
@@ -34,14 +36,17 @@ export async function registerForPushNotificationsAsync() {
         try {
             const { status: existingStatus } = await Notifications.getPermissionsAsync();
             let finalStatus = existingStatus;
+            console.log(`[PushNotification] Existing notification permission status: ${existingStatus}`);
 
             if (existingStatus !== "granted") {
+                console.log("[PushNotification] Requesting notification permissions...");
                 const { status } = await Notifications.requestPermissionsAsync();
                 finalStatus = status;
+                console.log(`[PushNotification] Requested permission result status: ${finalStatus}`);
             }
 
             if (finalStatus !== "granted") {
-                console.log("Failed to get push token for push notification: permission not granted");
+                console.log("[PushNotification] Failed to get push token: permission not granted (finalStatus !== 'granted')");
                 return null;
             }
 
@@ -49,13 +54,18 @@ export async function registerForPushNotificationsAsync() {
                 Constants?.expoConfig?.extra?.eas?.projectId ||
                 Constants?.easConfig?.projectId;
 
+            console.log(`[PushNotification] Fetching Expo Push Token with projectId: ${projectId || "undefined"}`);
+
             const pushTokenData = await Notifications.getExpoPushTokenAsync(
                 projectId ? { projectId } : undefined
             );
             token = pushTokenData.data;
+            console.log("[PushNotification] Fetched Expo Push Token:", token);
 
             if (token) {
-                await updatePushTokenApi(token);
+                console.log("[PushNotification] Sending token to backend via updatePushTokenApi...");
+                const apiRes = await updatePushTokenApi(token);
+                console.log("[PushNotification] Backend updatePushTokenApi response:", JSON.stringify(apiRes, null, 2));
                 console.log("Expo Push Token registered successfully:", token);
             }
         } catch (error: any) {
@@ -68,11 +78,11 @@ export async function registerForPushNotificationsAsync() {
                     "3. Add \"googleServicesFile\": \"./google-services.json\" under \"android\" in app.json."
                 );
             } else {
-                console.log("Expo Push Token registration warning/error:", error);
+                console.log("[PushNotification] Expo Push Token registration warning/error:", error);
             }
         }
     } else {
-        console.log("Must use native device for Expo Push Notifications");
+        console.log("[PushNotification] Must use native device for Expo Push Notifications");
     }
 
     return token;
@@ -85,20 +95,24 @@ export function usePushNotifications(userId?: string) {
     const router = useRouter();
 
     useEffect(() => {
-        if (!userId) return;
+        console.log(`[PushNotification] usePushNotifications hook executed for userId: ${userId || "undefined"}`);
+        if (!userId) {
+            console.log("[PushNotification] No userId provided to usePushNotifications. Skipping registration.");
+            return;
+        }
 
         // Register push token upon login/app start
         registerForPushNotificationsAsync();
 
         // Observer for foreground notification delivery
         const notificationListener = Notifications.addNotificationReceivedListener(notification => {
-            console.log("Notification received in foreground:", notification.request.content);
+            console.log("[PushNotification] Notification received in foreground:", JSON.stringify(notification.request.content, null, 2));
         });
 
         // Observer for user tapping/interacting with a notification
         const responseListener = Notifications.addNotificationResponseReceivedListener(response => {
             const data = response.notification.request.content.data;
-            console.log("Notification response received:", data);
+            console.log("[PushNotification] Notification response (user tapped notification):", JSON.stringify(data, null, 2));
 
             if (!data || typeof data !== "object") return;
 
@@ -125,6 +139,7 @@ export function usePushNotifications(userId?: string) {
         });
 
         return () => {
+            console.log(`[PushNotification] Cleaning up notification listeners for userId: ${userId}`);
             notificationListener.remove();
             responseListener.remove();
         };

@@ -4,7 +4,11 @@ import { Stack } from "expo-router";
 import { View } from "react-native";
 import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
-import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import {
+    QueryClient,
+    QueryClientProvider,
+    useQueryClient
+} from "@tanstack/react-query";
 
 import React, { useEffect } from "react";
 import { useUser } from "../store/user.store.js";
@@ -34,11 +38,17 @@ const SocketInitializer = () => {
         if (userId) {
             const socket = connectSocket();
 
-            const handleNewNotification = ({ conversationId, message }: any) => {
+            const handleNewNotification = ({
+                conversationId,
+                message
+            }: any) => {
                 if (!message) return;
                 queryClient.setQueryData(["conversations"], (old: any) => {
                     if (!old?.conversations) return old;
-                    const senderId = typeof message.sender === "string" ? message.sender : message.sender?._id;
+                    const senderId =
+                        typeof message.sender === "string"
+                            ? message.sender
+                            : message.sender?._id;
                     const isFromOther = senderId !== userId;
 
                     let updatedConv: any = null;
@@ -47,8 +57,12 @@ const SocketInitializer = () => {
                             updatedConv = {
                                 ...c,
                                 lastMessage: message,
-                                updatedAt: message.createdAt || new Date().toISOString(),
-                                unreadCountForMe: isFromOther ? (c.unreadCountForMe || 0) + 1 : (c.unreadCountForMe || 0)
+                                updatedAt:
+                                    message.createdAt ||
+                                    new Date().toISOString(),
+                                unreadCountForMe: isFromOther
+                                    ? (c.unreadCountForMe || 0) + 1
+                                    : c.unreadCountForMe || 0
                             };
                             return false;
                         }
@@ -72,7 +86,10 @@ const SocketInitializer = () => {
                             if (c._id === conversationId) {
                                 return {
                                     ...c,
-                                    unreadCountForMe: readBy === userId ? 0 : c.unreadCountForMe
+                                    unreadCountForMe:
+                                        readBy === userId
+                                            ? 0
+                                            : c.unreadCountForMe
                                 };
                             }
                             return c;

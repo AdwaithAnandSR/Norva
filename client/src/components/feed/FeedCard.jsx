@@ -23,6 +23,7 @@ import { useComments } from "../../store/comment.store.js";
 import HeartAnim from "../common/HeartAnim.tsx";
 import PostOptions from "./PostOptions.jsx";
 import FollowButton from "./FollowButton.jsx";
+import InitialsAvatar from "../search/InitialsAvatar.jsx";
 
 const blurhash = "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azay";
 const AImage = Animated.createAnimatedComponent(Image);
@@ -205,15 +206,20 @@ const PostCard = ({ post }) => {
             >
                 {/* Author row */}
                 <View className="flex-row items-center justify-between px-3.5 pt-3.5 pb-2.5">
-                    <View className="flex-row items-center gap-[10px]">
-                        <View className="w-10 h-10 rounded-full bg-card-selected border-2 border-btn/30 items-center justify-center">
-                            <Text
-                                className="text-btn text-lg"
-                                style={{ fontFamily: "WinkyRoughExtraBold" }}
-                            >
-                                {author?.fullname?.[0]?.toUpperCase() ?? "?"}
-                            </Text>
-                        </View>
+                    <TouchableOpacity
+                        activeOpacity={0.7}
+                        onPress={() => {
+                            if (author?._id) {
+                                router.push(`/(UserProfile)/${author._id}`);
+                            }
+                        }}
+                        className="flex-row items-center gap-[10px]"
+                    >
+                        <InitialsAvatar
+                            fullname={author?.fullname || author?.username}
+                            profileImage={author?.profileImage}
+                            size={40}
+                        />
                         <View>
                             <Text
                                 className="text-text text-[15px]"
@@ -228,7 +234,7 @@ const PostCard = ({ post }) => {
                                 @{author?.username ?? "unknown"}
                             </Text>
                         </View>
-                    </View>
+                    </TouchableOpacity>
 
                     {/* Options trigger */}
                     <View className="flex-row items-center gap-3">

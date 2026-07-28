@@ -1,32 +1,44 @@
 import User from "../../models/user.models.js";
 import { sendFollowNotification } from "../../services/notification.service.js";
+import { emitToUser } from "../../services/socket.service.js";
 
 export const followUser = async (req, res) => {
     try {
         const targetId = req.params.id;
         const myId = req.user.userId;
 
-        if (targetId === myId)
+        console.log(`[FollowController] followUser requested: sender=${myId} -> target=${targetId}`);
+
+        if (targetId === myId) {
+            console.log(`[FollowController] Rejected: User ${myId} attempted to follow self`);
             return res.status(400).json({ success: false, message: "CANNOT_FOLLOW_SELF" });
+        }
 
         const [me, target] = await Promise.all([
             User.findById(myId),
             User.findById(targetId)
         ]);
 
-        if (!me)
+        if (!me) {
+            console.log(`[FollowController] Failed: Sender user ${myId} not found`);
             return res.status(404).json({ success: false, message: "USER_NOT_FOUND" });
+        }
 
-        if (!target)
+        if (!target) {
+            console.log(`[FollowController] Failed: Target user ${targetId} not found`);
             return res.status(404).json({ success: false, message: "USER_NOT_FOUND" });
+        }
 
-        const alreadyFollowing = me.following.includes(targetId);
-        if (alreadyFollowing)
+        const alreadyFollowing = me.following.some(id => id.toString() === targetId);
+        console.log(`[FollowController] alreadyFollowing check for ${myId} -> ${targetId}: ${alreadyFollowing}`);
+
+        if (alreadyFollowing) {
             return res.status(200).json({
                 success: true,
                 isFollowing: true,
                 followersCount: target.followersCount
             });
+        }
 
         me.following.addToSet(targetId);
         me.followingCount = me.following.length;
@@ -36,11 +48,29 @@ export const followUser = async (req, res) => {
 
         await Promise.all([me.save(), target.save()]);
 
+        console.log(`[FollowController] DB updated: User ${me.username} (${myId}) is now following User ${target.username} (${targetId})`);
+
+        // Emit real-time socket event if connected
+        try {
+            emitToUser(targetId, "follow_notification", {
+                type: "follow",
+                followerId: myId,
+                followerName: me.fullname || me.username
+            });
+            console.log(`[FollowController] Socket follow_notification emitted to user:${targetId}`);
+        } catch (socketErr) {
+            console.error("[FollowController] Socket emission error:", socketErr);
+        }
+
+        // Trigger Expo push notification
+        console.log(`[FollowController] Triggering sendFollowNotification for recipientId: ${targetId}`);
         sendFollowNotification({
             recipientId: targetId,
             followerName: me.fullname || me.username,
             followerId: myId
-        }).catch(err => console.error("Follow notification error:", err));
+        })
+            .then(() => console.log(`[FollowController] sendFollowNotification promise resolved for targetId: ${targetId}`))
+            .catch(err => console.error("[FollowController] Follow notification error:", err));
 
         return res.status(200).json({
             success: true,
@@ -48,7 +78,7 @@ export const followUser = async (req, res) => {
             followersCount: target.followersCount
         });
     } catch (error) {
-        console.error("followUser error:", error);
+        console.error("[FollowController] followUser error:", error);
         return res.status(500).json({ success: false });
     }
 };

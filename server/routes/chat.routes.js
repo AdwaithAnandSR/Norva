@@ -6,7 +6,8 @@ import {
     sendMessage,
     markAsRead,
     markAsDelivered,
-    getChatContacts
+    getChatContacts,
+    clearChat
 } from "../controllers/chat/chat.controller.js";
 
 const router = express.Router();
@@ -18,5 +19,6 @@ router.post("/message", sendMessage);
 router.put("/read/:conversationId", markAsRead);
 router.put("/delivered/:conversationId", markAsDelivered);
 router.get("/contacts", getChatContacts);
+router.delete("/clear/:conversationId", clearChat);
 
 export default router;

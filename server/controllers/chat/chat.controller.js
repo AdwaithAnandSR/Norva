@@ -447,3 +447,52 @@ export const getChatContacts = async (req, res) => {
         return res.status(500).json({ success: false, message: error.message });
     }
 };
+
+// Clear all messages in a conversation
+export const clearChat = async (req, res) => {
+    try {
+        const myId = req.user.userId;
+        const { conversationId } = req.params;
+
+        const conversation = await Conversation.findById(conversationId);
+        if (!conversation) {
+            return res.status(404).json({
+                success: false,
+                message: "Conversation not found"
+            });
+        }
+
+        const isParticipant = conversation.participants.some(
+            p => p.toString() === myId
+        );
+        if (!isParticipant) {
+            return res.status(403).json({
+                success: false,
+                message: "Unauthorized"
+            });
+        }
+
+        // Delete all messages in the conversation
+        await Message.deleteMany({ conversation: conversationId });
+
+        // Reset lastMessage & unreadCount in conversation doc
+        await Conversation.updateOne(
+            { _id: conversationId },
+            {
+                $unset: { lastMessage: 1 },
+                $set: { unreadCount: {} }
+            }
+        );
+
+        // Notify room participants in real-time
+        emitToConversation(conversationId, "chat_cleared", { conversationId });
+
+        return res.status(200).json({
+            success: true,
+            message: "Chat cleared successfully"
+        });
+    } catch (error) {
+        console.error("clearChat error:", error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};

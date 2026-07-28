@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { View, KeyboardAvoidingView, Platform, Text, TouchableOpacity } from "react-native";
+import { View, KeyboardAvoidingView, Platform, Text, TouchableOpacity, Alert } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 import { Ionicons } from "@expo/vector-icons";
+import { useQueryClient } from "@tanstack/react-query";
 import {
     useInfiniteMessages,
-    useSendMessage
+    useSendMessage,
+    useClearChat
 } from "../../../../hooks/chat/useChatQuery.js";
 import { useChatRoomSocket } from "../../../../hooks/chat/useChatRoomSocket.js";
 import { useUser } from "../../../../store/user.store.js";
@@ -20,6 +22,7 @@ import MessageBubble from "../../../../components/chat/MessageBubble";
 import ChatInputBar from "../../../../components/chat/ChatInputBar";
 import ImagePreviewModal from "../../../../components/chat/ImagePreviewModal";
 import TypingIndicator from "../../../../components/chat/TypingIndicator";
+import ChatOptions from "../../../../components/chat/ChatOptions";
 
 // Module-level fallback & stable props to prevent unnecessary re-renders
 const EMPTY_MESSAGES: Message[] = [];
@@ -40,6 +43,7 @@ const ChatRoom = () => {
     const [sendingSocketMsg, setSendingSocketMsg] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
+    const [optionsVisible, setOptionsVisible] = useState(false);
     const [newMessagesCount, setNewMessagesCount] = useState(0);
     const [isNearBottom, setIsNearBottom] = useState(true);
     const isNearBottomRef = useRef(true);
@@ -48,8 +52,10 @@ const ChatRoom = () => {
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const flatListRef = useRef<any>(null);
 
+    const queryClient = useQueryClient();
     const messagesQuery = useInfiniteMessages(conversationId as string);
     const sendMessageMutation = useSendMessage();
+    const clearChatMutation = useClearChat();
 
     // Granular Zustand selector: only re-renders when this specific conversation's message array changes
     const messages = useChatStore(
@@ -64,9 +70,43 @@ const ChatRoom = () => {
     const retryMessageAction = useChatStore((s) => s.retryMessage);
     const hydrateConversationMessages = useChatStore((s) => s.hydrateConversationMessages);
     const prependOlderMessages = useChatStore((s) => s.prependOlderMessages);
+    const clearConversation = useChatStore((s) => s.clearConversation);
 
     // Dynamic socket hook for room joining, typing, and realtime events
     const { isTyping } = useChatRoomSocket(conversationId, myId);
+
+    const handleClearChat = useCallback(() => {
+        if (!conversationId) return;
+
+        Alert.alert(
+            "Clear Chat",
+            "Are you sure you want to delete all messages in this conversation? This action cannot be undone.",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Clear",
+                    style: "destructive",
+                    onPress: () => {
+                        clearChatMutation.mutate(conversationId as string, {
+                            onSuccess: () => {
+                                clearConversation(conversationId as string);
+                                queryClient.setQueryData(
+                                    ["messages", conversationId],
+                                    { pages: [], pageParams: [] }
+                                );
+                                queryClient.invalidateQueries({
+                                    queryKey: ["messages", conversationId]
+                                });
+                                queryClient.invalidateQueries({
+                                    queryKey: ["conversations"]
+                                });
+                            }
+                        });
+                    }
+                }
+            ]
+        );
+    }, [conversationId, clearChatMutation, clearConversation, queryClient]);
 
     // Hydrate initial page into Zustand (store performs structural equality checks)
     useEffect(() => {
@@ -425,6 +465,7 @@ const ChatRoom = () => {
                 otherUser={otherUser}
                 isTyping={isTyping}
                 recipientId={recipientId}
+                onClearChat={() => setOptionsVisible(true)}
             />
 
             {/* KeyboardAvoidingView for Messages List & Input */}
@@ -501,6 +542,22 @@ const ChatRoom = () => {
                 <ImagePreviewModal
                     previewImage={previewImage}
                     onClose={() => setPreviewImage(null)}
+                />
+
+                {/* Chat Options Sheet */}
+                <ChatOptions
+                    visible={optionsVisible}
+                    onClose={() => setOptionsVisible(false)}
+                    onClearChat={handleClearChat}
+                    onViewProfile={
+                        recipientId
+                            ? () =>
+                                  router.push({
+                                      pathname: "/(UserProfile)/[id]" as any,
+                                      params: { id: recipientId }
+                                  })
+                            : undefined
+                    }
                 />
             </KeyboardAvoidingView>
         </View>

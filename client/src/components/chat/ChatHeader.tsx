@@ -8,9 +8,15 @@ interface ChatHeaderProps {
     otherUser: any;
     isTyping: boolean;
     recipientId?: string;
+    onClearChat?: () => void;
 }
 
-const ChatHeader = ({ otherUser, isTyping, recipientId }: ChatHeaderProps) => {
+const ChatHeader = ({
+    otherUser,
+    isTyping,
+    recipientId,
+    onClearChat
+}: ChatHeaderProps) => {
     return (
         <View
             className="flex-row items-center justify-between px-4 py-3 border-b border-white/10"
@@ -63,7 +69,11 @@ const ChatHeader = ({ otherUser, isTyping, recipientId }: ChatHeaderProps) => {
             </TouchableOpacity>
 
             <View className="flex-row items-center space-x-2">
-                <TouchableOpacity className="p-2">
+                <TouchableOpacity
+                    onPress={onClearChat}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    className="p-2"
+                >
                     <Feather
                         name="more-vertical"
                         size={20}

@@ -129,17 +129,29 @@ const UserProfile = () => {
 
             {/* Follow & Message Buttons */}
             {profile._id !== myId && (
-                <View className="flex-row items-center justify-center space-x-3 px-6 mt-4 mb-2">
-                    <FollowButton userId={profile._id} />
+                <View className="flex-row items-center justify-center gap-3 px-6 mt-4 mb-2">
+                    <FollowButton
+                        userId={profile._id}
+                        style={{
+                            flex: 1,
+                            paddingVertical: 10,
+                            borderRadius: 9999,
+                            alignItems: "center",
+                            justifyContent: "center"
+                        }}
+                        textStyle={{
+                            fontSize: 12
+                        }}
+                    />
                     <TouchableOpacity
                         onPress={handleMessage}
                         disabled={accessConvMutation.isPending}
-                        className="bg-card-selected px-5 py-2.5 rounded-full border border-btn/30 flex-row items-center"
+                        className="flex-1 bg-card-selected py-2.5 rounded-full border border-btn/30 flex-row items-center justify-center"
                     >
-                        <Feather name="message-square" size={16} color="#6437ff" />
+                        <Feather name="message-square" size={14} color="#6437ff" />
                         <Text
-                            style={{ fontFamily: "SpaceMono" }}
-                            className="text-text font-bold text-xs ml-2"
+                            style={{ fontFamily: "SpaceMono", fontSize: 12 }}
+                            className="text-text font-bold ml-2"
                         >
                             Message
                         </Text>

@@ -68,11 +68,18 @@ export const useChatRoomSocket = (conversationId, myId) => {
             }
         };
 
+        const handleChatCleared = (data) => {
+            if (data?.conversationId === conversationId) {
+                useChatStore.getState().clearConversation(conversationId);
+            }
+        };
+
         socket.on("new_message", handleNewMessage);
         socket.on("messages_delivered", handleMessagesDelivered);
         socket.on("messages_read", handleMessagesRead);
         socket.on("typing", handleTyping);
         socket.on("stop_typing", handleStopTyping);
+        socket.on("chat_cleared", handleChatCleared);
 
         return () => {
             socket.emit("leave_conversation", conversationId);
@@ -81,6 +88,7 @@ export const useChatRoomSocket = (conversationId, myId) => {
             socket.off("messages_read", handleMessagesRead);
             socket.off("typing", handleTyping);
             socket.off("stop_typing", handleStopTyping);
+            socket.off("chat_cleared", handleChatCleared);
         };
     }, [conversationId, myId]);
 

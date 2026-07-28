@@ -11,27 +11,45 @@ export const sendPushNotification = async ({ recipientId, recipientIds, title, b
         const ids = recipientIds ? recipientIds : [recipientId];
         const uniqueIds = [...new Set(ids.map(id => id?.toString()))].filter(Boolean);
 
-        if (uniqueIds.length === 0) return;
+        console.log(`[NotificationService] sendPushNotification called for recipientIds:`, uniqueIds, `| Title: "${title}", Body: "${body}"`);
+
+        if (uniqueIds.length === 0) {
+            console.warn(`[NotificationService] Warning: sendPushNotification received empty recipient list.`);
+            return;
+        }
 
         const users = await User.find({ _id: { $in: uniqueIds } })
-            .select("expoPushToken pushTokens")
+            .select("expoPushToken pushTokens username")
             .lean();
+
+        console.log(`[NotificationService] DB query returned ${users.length} user(s) for recipientIds:`, uniqueIds);
 
         const messages = [];
         for (const user of users) {
             const tokens = new Set();
 
-            if (user.expoPushToken && Expo.isExpoPushToken(user.expoPushToken)) {
-                tokens.add(user.expoPushToken);
+            if (user.expoPushToken) {
+                const isValid = Expo.isExpoPushToken(user.expoPushToken);
+                console.log(`[NotificationService] User ${user._id} (${user.username || "no-username"}) expoPushToken: "${user.expoPushToken}" | isValidExpoToken: ${isValid}`);
+                if (isValid) {
+                    tokens.add(user.expoPushToken);
+                }
+            } else {
+                console.log(`[NotificationService] User ${user._id} (${user.username || "no-username"}) has no main expoPushToken registered.`);
             }
 
-            if (Array.isArray(user.pushTokens)) {
+            if (Array.isArray(user.pushTokens) && user.pushTokens.length > 0) {
+                console.log(`[NotificationService] User ${user._id} has ${user.pushTokens.length} token(s) in pushTokens array:`, user.pushTokens);
                 user.pushTokens.forEach(token => {
-                    if (token && Expo.isExpoPushToken(token)) {
+                    const isValid = token && Expo.isExpoPushToken(token);
+                    console.log(`[NotificationService] Checking pushTokens entry: "${token}" | isValidExpoToken: ${isValid}`);
+                    if (isValid) {
                         tokens.add(token);
                     }
                 });
             }
+
+            console.log(`[NotificationService] Total unique valid tokens for user ${user._id}: ${tokens.size}`);
 
             for (const pushToken of tokens) {
                 messages.push({
@@ -46,19 +64,25 @@ export const sendPushNotification = async ({ recipientId, recipientIds, title, b
             }
         }
 
-        if (messages.length === 0) return;
+        if (messages.length === 0) {
+            console.warn(`[NotificationService] Warning: No valid Expo push tokens found for recipient(s):`, uniqueIds);
+            return;
+        }
 
+        console.log(`[NotificationService] Dispatching ${messages.length} message(s) to Expo Push Service...`);
         const chunks = expo.chunkPushNotifications(messages);
-        for (const chunk of chunks) {
+        for (let i = 0; i < chunks.length; i++) {
+            const chunk = chunks[i];
             try {
+                console.log(`[NotificationService] Sending chunk ${i + 1}/${chunks.length} containing ${chunk.length} notification(s)...`);
                 const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-                console.log("Expo Push notification sent:", ticketChunk);
+                console.log(`[NotificationService] Expo Push response (chunk ${i + 1}):`, JSON.stringify(ticketChunk, null, 2));
             } catch (error) {
-                console.error("Error sending Expo push chunk:", error);
+                console.error(`[NotificationService] Error sending Expo push chunk ${i + 1}:`, error);
             }
         }
     } catch (err) {
-        console.error("sendPushNotification error:", err);
+        console.error("[NotificationService] sendPushNotification error:", err);
     }
 };
 
@@ -84,6 +108,7 @@ export const sendNewMessageNotification = async ({ recipientIds, senderName, mes
  * Helper for Follow Notification
  */
 export const sendFollowNotification = async ({ recipientId, followerName, followerId }) => {
+    console.log(`[NotificationService] sendFollowNotification triggered: recipientId=${recipientId}, followerName=${followerName}, followerId=${followerId}`);
     await sendPushNotification({
         recipientId,
         title: "New Follower",

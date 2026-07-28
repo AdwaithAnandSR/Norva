@@ -17,6 +17,7 @@ import ReelPlayer from "./ReelPlayer.jsx";
 import HeartAnim from "../common/HeartAnim.tsx";
 import PostOptions from "./PostOptions.jsx";
 import FollowButton from "./FollowButton.jsx";
+import InitialsAvatar from "../search/InitialsAvatar.jsx";
 
 import { setLike, deletePost } from "../../controllers/post/feed.controller.js";
 import { useUser } from "../../store/user.store.js";
@@ -218,19 +219,19 @@ const ReelCard = ({ post, isActive, pageHeight }) => {
                 className="absolute px-3 bottom-0 py-3"
                 pointerEvents="box-none"
             >
-                <View className="flex-row items-center gap-2 mb-2">
-                    <View className="w-9 h-9 rounded-full bg-card-selected border-2 border-btn/30 items-center justify-center">
-                        <Text
-                            className="text-btn text-base"
-                            style={{ fontFamily: "WinkyRoughExtraBold" }}
-                        >
-                            {author?.fullname?.[0]?.toUpperCase() ?? "?"}
-                        </Text>
-                    </View>
+                <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() =>
+                        author?._id && router.push(`/(UserProfile)/${author._id}`)
+                    }
+                    className="flex-row items-center gap-2 mb-2"
+                >
+                    <InitialsAvatar
+                        fullname={author?.fullname || author?.username}
+                        profileImage={author?.profileImage}
+                        size={36}
+                    />
                     <Text
-                        onPress={() =>
-                            router.push(`/(UserProfile)/${author._id}`)
-                        }
                         className="text-white text-md"
                         style={{ fontFamily: "WinkyRoughExtraBold" }}
                         numberOfLines={1}
@@ -240,7 +241,7 @@ const ReelCard = ({ post, isActive, pageHeight }) => {
                     {!isOwner && author?._id && (
                         <FollowButton userId={author._id} />
                     )}
-                </View>
+                </TouchableOpacity>
 
                 {!!post.title && (
                     <Text

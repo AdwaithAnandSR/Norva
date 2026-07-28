@@ -42,3 +42,9 @@ export const getChatContacts = async (q = "") => {
     const { data } = await api.get("/chat/contacts", { params: { q } });
     return data; // { success, users }
 };
+
+// Clear all messages in a conversation
+export const clearChat = async conversationId => {
+    const { data } = await api.delete(`/chat/clear/${conversationId}`);
+    return data; // { success, message }
+};

@@ -2,7 +2,7 @@ import React, { memo } from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
 import { useFollow } from "../../hooks/user/useFollow.js";
 
-const FollowButton = ({ userId }) => {
+const FollowButton = ({ userId, style, textStyle }) => {
     const { isFollowing, toggle, isPending } = useFollow(userId);
 
     return (
@@ -12,13 +12,15 @@ const FollowButton = ({ userId }) => {
             disabled={isPending}
             style={[
                 styles.button,
-                isFollowing ? styles.followingButton : styles.followButton
+                isFollowing ? styles.followingButton : styles.followButton,
+                style
             ]}
         >
             <Text
                 style={[
                     styles.text,
-                    isFollowing ? styles.followingText : styles.followText
+                    isFollowing ? styles.followingText : styles.followText,
+                    textStyle
                 ]}
             >
                 {isFollowing ? "Following" : "Follow"}

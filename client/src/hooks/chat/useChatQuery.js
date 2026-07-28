@@ -9,7 +9,8 @@ import {
     sendMessage,
     accessConversation,
     markAsRead,
-    getChatContacts
+    getChatContacts,
+    clearChat
 } from "../../controllers/chat/chat.controller.js";
 
 export const useConversations = () => {
@@ -57,5 +58,11 @@ export const useChatContacts = (q = "") => {
     return useQuery({
         queryKey: ["chatContacts", q],
         queryFn: () => getChatContacts(q)
+    });
+};
+
+export const useClearChat = () => {
+    return useMutation({
+        mutationFn: clearChat
     });
 };

@@ -158,12 +158,16 @@ export const updatePushToken = async (req, res) => {
         const myId = req.user.userId;
         const { pushToken } = req.body;
 
+        console.log(`[ProfileController] updatePushToken called for user ${myId} with pushToken: "${pushToken}"`);
+
         if (!pushToken) {
+            console.log(`[ProfileController] updatePushToken failed: PUSH_TOKEN_REQUIRED`);
             return res.status(400).json({ success: false, message: "PUSH_TOKEN_REQUIRED" });
         }
 
         const user = await User.findById(myId);
         if (!user) {
+            console.log(`[ProfileController] updatePushToken failed: User ${myId} not found in DB`);
             return res.status(404).json({ success: false, message: "USER_NOT_FOUND" });
         }
 
@@ -174,9 +178,11 @@ export const updatePushToken = async (req, res) => {
         }
         await user.save();
 
+        console.log(`[ProfileController] Successfully updated push token for user ${user.username || myId}. Main token: "${user.expoPushToken}", Total pushTokens: ${user.pushTokens.length}`);
+
         return res.status(200).json({ success: true, message: "PUSH_TOKEN_UPDATED" });
     } catch (error) {
-        console.error("updatePushToken error:", error);
+        console.error("[ProfileController] updatePushToken error:", error);
         return res.status(500).json({ success: false });
     }
 };
