@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { Feather } from "@expo/vector-icons";
@@ -23,7 +23,7 @@ const QuickButtons = ({ hasNoPosts }) => {
             animate={{ opacity: 1, translateY: 0 }}
             transition={{ type: "spring", damping: 20, stiffness: 200 }}
             useHardwareLayer={true}
-            style={{ gap: 10, marginTop: 12, paddingHorizontal: 24 }}
+            style={styles.container}
         >
             <AnimatedPressable
                 scaleTo={0.95}
@@ -84,5 +84,13 @@ const QuickButtons = ({ hasNoPosts }) => {
         </EaseView>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        gap: 10,
+        marginTop: 12,
+        paddingHorizontal: 24
+    }
+});
 
 export default QuickButtons;

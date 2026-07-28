@@ -23,14 +23,12 @@ export const useFollow = userId => {
 
     const mutation = useMutation({
         mutationFn: async currentlyFollowing => {
-            console.log(`[useFollow] Triggering ${currentlyFollowing ? "unfollow" : "follow"} API call for target userId: ${userId}`);
             return currentlyFollowing
                 ? unfollowUser(userId)
                 : followUser(userId);
         },
 
         onMutate: async currentlyFollowing => {
-            console.log(`[useFollow] onMutate: currentlyFollowing=${currentlyFollowing}, toggling to ${!currentlyFollowing} for target userId: ${userId}`);
             // 1. Haptic feedback on tap
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
@@ -56,7 +54,9 @@ export const useFollow = userId => {
                     ...old,
                     user: {
                         ...old.user,
-                        followersCount: nextIsFollowing ? cur + 1 : Math.max(0, cur - 1),
+                        followersCount: nextIsFollowing
+                            ? cur + 1
+                            : Math.max(0, cur - 1),
                         isFollowing: nextIsFollowing
                     }
                 };
@@ -70,7 +70,9 @@ export const useFollow = userId => {
                     ...old,
                     user: {
                         ...old.user,
-                        followingCount: nextIsFollowing ? cur + 1 : Math.max(0, cur - 1)
+                        followingCount: nextIsFollowing
+                            ? cur + 1
+                            : Math.max(0, cur - 1)
                     }
                 };
             });
@@ -80,7 +82,10 @@ export const useFollow = userId => {
         },
 
         onError: (err, currentlyFollowing, context) => {
-            console.error(`[useFollow] Follow mutation failed for target userId: ${userId}:`, err);
+            console.error(
+                `[useFollow] Follow mutation failed for target userId: ${userId}:`,
+                err
+            );
             // Revert to the snapshot state if the API call fails
             if (!context) return;
             setToast("red=>Failed");
@@ -98,7 +103,6 @@ export const useFollow = userId => {
         },
 
         onSuccess: res => {
-            console.log(`[useFollow] Follow mutation succeeded for target userId: ${userId}. Response:`, JSON.stringify(res, null, 2));
             // Sync with backend source-of-truth if available
             if (res?.success && typeof res.isFollowing === "boolean") {
                 setFollowing(userId, res.isFollowing);

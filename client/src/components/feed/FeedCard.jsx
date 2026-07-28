@@ -4,7 +4,8 @@ import {
     TouchableOpacity,
     Pressable,
     Image as RNImage,
-    Dimensions
+    Dimensions,
+    StyleSheet
 } from "react-native";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Image } from "expo-image";
@@ -202,13 +203,7 @@ const PostCard = ({ post }) => {
                 animate={{ opacity: 1, translateY: 0, scale: 1 }}
                 transition={{ type: "spring", damping: 22, stiffness: 220 }}
                 useHardwareLayer={true}
-                className="w-full bg-card/60 rounded-[20px] mb-4 overflow-hidden border border-border self-center"
-                style={{
-                    shadowColor: "#6437ff",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.12,
-                    shadowRadius: 16
-                }}
+                style={styles.easeView}
             >
                 {/* Author row */}
                 <View className="flex-row items-center justify-between px-3.5 pt-3.5 pb-2.5">
@@ -399,5 +394,22 @@ const PostCard = ({ post }) => {
         </Pressable>
     );
 };
+
+const styles = StyleSheet.create({
+    easeView: {
+        width: "100%",
+        backgroundColor: "rgba(13, 13, 26, 0.6)",
+        borderRadius: 20,
+        marginBottom: 16,
+        overflow: "hidden",
+        borderWidth: 1,
+        borderColor: "rgba(100, 55, 255, 0.12)",
+        alignSelf: "center",
+        shadowColor: "#6437ff",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.12,
+        shadowRadius: 16
+    }
+});
 
 export default PostCard;

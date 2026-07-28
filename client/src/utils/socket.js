@@ -18,7 +18,6 @@ export const getSocket = () => {
         });
 
         socket.on("connect", async () => {
-            console.log("[Socket] Connected with ID:", socket?.id);
             const userId = useUser.getState().userId;
             if (userId && socket) {
                 socket.emit("setup", userId);
@@ -27,15 +26,17 @@ export const getSocket = () => {
                 try {
                     const data = await getConversations();
                     if (data?.conversations) {
-                        useChatStore.getState().setConversations(data.conversations);
+                        useChatStore
+                            .getState()
+                            .setConversations(data.conversations);
                     }
                 } catch (e) {
-                    console.log("[Socket] Reconnect sync error:", e);
+                    console.error("[Socket] Reconnect sync error:", e);
                 }
             }
         });
 
-        socket.on("new_message", (message) => {
+        socket.on("new_message", message => {
             if (!message?.conversation) return;
             const convId =
                 typeof message.conversation === "string"
@@ -61,7 +62,11 @@ export const getSocket = () => {
             if (message?.tempId) {
                 useChatStore
                     .getState()
-                    .replaceTempMessage(conversationId, message.tempId, message);
+                    .replaceTempMessage(
+                        conversationId,
+                        message.tempId,
+                        message
+                    );
             } else {
                 useChatStore
                     .getState()
@@ -71,7 +76,9 @@ export const getSocket = () => {
 
         socket.on("messages_delivered", ({ conversationId, deliveredTo }) => {
             if (conversationId && deliveredTo) {
-                useChatStore.getState().markDelivered(conversationId, deliveredTo);
+                useChatStore
+                    .getState()
+                    .markDelivered(conversationId, deliveredTo);
             }
         });
 
@@ -89,13 +96,9 @@ export const getSocket = () => {
             }
         });
 
-        socket.on("connect_error", (err) => {
-            console.log("[Socket] Connection error:", err.message);
-        });
+        socket.on("connect_error", err => {});
 
-        socket.on("disconnect", (reason) => {
-            console.log("[Socket] Disconnected:", reason);
-        });
+        socket.on("disconnect", reason => {});
     }
 
     const userId = useUser.getState().userId;

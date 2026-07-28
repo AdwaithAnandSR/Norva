@@ -43,7 +43,7 @@ const handleSignUp = async (data, page, setMessage) => {
         }
     } catch (error) {
         setToast("red=>Authentication Failed");
-        console.log("Error while authentication: ", error.message);
+        console.error("Error while authentication: ", error.message);
         if (error?.response?.data)
             handleMessage(error.response.data.message?.split("_")?.join(" "));
         else handleMessage(error.message);

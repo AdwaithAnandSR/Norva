@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { EaseView } from "react-native-ease";
@@ -19,17 +19,7 @@ const Home = () => {
             animate={{ opacity: 1, translateY: 0 }}
             transition={{ type: "spring", damping: 20, stiffness: 180 }}
             useHardwareLayer={true}
-            style={{
-                flexDirection: "row",
-                width: "100%",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                position: "absolute",
-                left: 0,
-                top: 45,
-                paddingHorizontal: 15,
-                zIndex: 999
-            }}
+            style={styles.header}
         >
             <Text
                 style={{
@@ -61,5 +51,19 @@ const Home = () => {
         </EaseView>
     );
 };
+
+const styles = StyleSheet.create({
+    header: {
+        flexDirection: "row",
+        width: "100%",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        position: "absolute",
+        left: 0,
+        top: 45,
+        paddingHorizontal: 15,
+        zIndex: 999
+    }
+});
 
 export default Home;

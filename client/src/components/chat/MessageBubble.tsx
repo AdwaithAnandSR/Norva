@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -85,9 +85,10 @@ const MessageBubble = ({
                 animate={{ opacity: 1, translateY: 0, scale: 1 }}
                 transition={{ type: "spring", damping: 24, stiffness: 240 }}
                 useHardwareLayer={true}
-                className={`my-1 max-w-[80%] ${
-                    isMe ? "self-end items-end" : "self-start items-start"
-                }`}
+                style={[
+                    styles.easeView,
+                    isMe ? styles.selfEnd : styles.selfStart
+                ]}
             >
                 <TouchableOpacity
                     activeOpacity={0.9}
@@ -138,9 +139,10 @@ const MessageBubble = ({
                 animate={{ opacity: 1, translateY: 0, scale: 1 }}
                 transition={{ type: "spring", damping: 24, stiffness: 240 }}
                 useHardwareLayer={true}
-                className={`my-1 max-w-[80%] ${
-                    isMe ? "self-end items-end" : "self-start items-start"
-                }`}
+                style={[
+                    styles.easeView,
+                    isMe ? styles.selfEnd : styles.selfStart
+                ]}
             >
                 <View
                     className={`px-4 py-2.5 rounded-2xl ${
@@ -170,9 +172,10 @@ const MessageBubble = ({
             animate={{ opacity: 1, translateY: 0, scale: 1 }}
             transition={{ type: "spring", damping: 24, stiffness: 240 }}
             useHardwareLayer={true}
-            className={`my-1 max-w-[80%] ${
-                isMe ? "self-end items-end" : "self-start items-start"
-            }`}
+            style={[
+                styles.easeView,
+                isMe ? styles.selfEnd : styles.selfStart
+            ]}
         >
             <TouchableOpacity
                 activeOpacity={0.9}
@@ -229,6 +232,21 @@ const MessageBubble = ({
         </EaseView>
     );
 };
+
+const styles = StyleSheet.create({
+    easeView: {
+        marginVertical: 4,
+        maxWidth: "80%"
+    },
+    selfEnd: {
+        alignSelf: "flex-end",
+        alignItems: "flex-end"
+    },
+    selfStart: {
+        alignSelf: "flex-start",
+        alignItems: "flex-start"
+    }
+});
 
 export default React.memo(MessageBubble, (prevProps, nextProps) => {
     return (

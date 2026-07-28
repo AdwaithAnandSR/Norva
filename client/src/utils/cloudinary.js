@@ -50,9 +50,7 @@ export const uploadToCloudinary = async (file, onProgress, folder = "posts") => 
             mediaPublicId: data.public_id
         };
     } catch (error) {
-        console.log(error);
-        console.log(error?.response?.data);
-
+        
         return {
             success: false,
             error

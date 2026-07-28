@@ -139,7 +139,7 @@ const ChatRoom = () => {
             passedUser = JSON.parse(userParam);
         }
     } catch (err) {
-        console.log("Error parsing userParam:", err);
+        console.error("Error parsing userParam:", err);
     }
 
     const conversationFromQuery = messagesQuery.data?.pages?.[0]?.conversation;

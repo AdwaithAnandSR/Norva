@@ -28,8 +28,6 @@ export const createPost = async ({
         return true;
     } catch (error) {
         setToast("red=>Failed");
-        console.log(error);
-
         return false;
     }
 };
@@ -58,8 +56,6 @@ export const deletePost = async postId => {
         return data; // { success }
     } catch (e) {
         setToast("red=>Failed");
-        console.log(e);
-
         return { success: false };
     }
 };
@@ -75,8 +71,6 @@ export const editPost = async (postId, { title, description, tags }) => {
         return data; // { success, post }
     } catch (e) {
         setToast("red=>Failed");
-        console.log(e);
-
         return { success: false };
     }
 };

@@ -38,7 +38,7 @@ export const Preview = ({ uri, uploadProgress }) => {
                     setRatio(width / height);
                 },
                 error => {
-                    console.log(error);
+                    console.error(error);
                 }
             );
         }

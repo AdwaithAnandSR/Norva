@@ -69,7 +69,7 @@ const signUp = async (req, res) => {
             refreshToken
         });
     } catch (err) {
-        console.log(`Error while SignUp: ${err}`);
+        console.error(`Error while SignUp: ${err}`);
 
         res.status(500).json({
             message: "INTERNAL_ERROR",
