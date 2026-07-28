@@ -8,6 +8,7 @@ import {
     TouchableOpacity
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { EaseView } from "react-native-ease";
 
 import handleAuth from "../../controllers/auth/auth.controller.js";
 import {
@@ -15,6 +16,7 @@ import {
     isValidPassword
 } from "../../utils/validateAuthData.js";
 import { greenGlow } from "../../constants/style.js";
+import AnimatedPressable from "../common/AnimatedPressable.jsx";
 
 const { height: vh, width: vw } = Dimensions.get("window");
 
@@ -30,7 +32,13 @@ const SigninInputs = () => {
     const [message, setMessage] = useState("");
 
     return (
-        <View style={styles.inputCont}>
+        <EaseView
+            initialAnimate={{ opacity: 0, translateY: 20 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: "spring", damping: 22, stiffness: 200 }}
+            useHardwareLayer={true}
+            style={styles.inputCont}
+        >
             <TextInput
                 style={styles.input}
                 placeholder={"username"}
@@ -78,13 +86,14 @@ const SigninInputs = () => {
 
             <Text style={styles.resText}>{message}</Text>
 
-            <TouchableOpacity
+            <AnimatedPressable
                 onPress={() => handleAuth(formData, "signin", setMessage)}
+                scaleTo={0.95}
                 style={[styles.button, greenGlow]}
             >
                 <Text style={styles.buttonText}>Sign In</Text>
-            </TouchableOpacity>
-        </View>
+            </AnimatedPressable>
+        </EaseView>
     );
 };
 

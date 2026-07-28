@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialIcons } from "@expo/vector-icons";
+import { EaseView } from "react-native-ease";
 
 const blurhash = "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azay";
 
@@ -79,7 +80,11 @@ const MessageBubble = ({
 
     if (isImageOnly) {
         return (
-            <View
+            <EaseView
+                initialAnimate={{ opacity: 0, translateY: 10, scale: 0.95 }}
+                animate={{ opacity: 1, translateY: 0, scale: 1 }}
+                transition={{ type: "spring", damping: 24, stiffness: 240 }}
+                useHardwareLayer={true}
                 className={`my-1 max-w-[80%] ${
                     isMe ? "self-end items-end" : "self-start items-start"
                 }`}
@@ -121,14 +126,18 @@ const MessageBubble = ({
                         {isMe && getStatusIcon()}
                     </View>
                 </TouchableOpacity>
-            </View>
+            </EaseView>
         );
     }
 
     // Text Only Messages
     if (!item.image) {
         return (
-            <View
+            <EaseView
+                initialAnimate={{ opacity: 0, translateY: 10, scale: 0.95 }}
+                animate={{ opacity: 1, translateY: 0, scale: 1 }}
+                transition={{ type: "spring", damping: 24, stiffness: 240 }}
+                useHardwareLayer={true}
                 className={`my-1 max-w-[80%] ${
                     isMe ? "self-end items-end" : "self-start items-start"
                 }`}
@@ -150,13 +159,17 @@ const MessageBubble = ({
                         {isMe && getStatusIcon()}
                     </View>
                 </View>
-            </View>
+            </EaseView>
         );
     }
 
     // Image + Text Messages
     return (
-        <View
+        <EaseView
+            initialAnimate={{ opacity: 0, translateY: 10, scale: 0.95 }}
+            animate={{ opacity: 1, translateY: 0, scale: 1 }}
+            transition={{ type: "spring", damping: 24, stiffness: 240 }}
+            useHardwareLayer={true}
             className={`my-1 max-w-[80%] ${
                 isMe ? "self-end items-end" : "self-start items-start"
             }`}
@@ -213,7 +226,7 @@ const MessageBubble = ({
                     </View>
                 </View>
             </TouchableOpacity>
-        </View>
+        </EaseView>
     );
 };
 

@@ -1,8 +1,10 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { EaseView } from "react-native-ease";
 import { useConversations } from "../../hooks/chat/useChatQuery.js";
+import AnimatedPressable from "./AnimatedPressable.jsx";
 
 const Home = () => {
     const { data } = useConversations();
@@ -12,7 +14,23 @@ const Home = () => {
     );
 
     return (
-        <View className="w-full px-4 flex-row items-start justify-between absolute z-20 top-10 left-0">
+        <EaseView
+            initialAnimate={{ opacity: 0, translateY: -15 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: "spring", damping: 20, stiffness: 180 }}
+            useHardwareLayer={true}
+            style={{
+                flexDirection: "row",
+                width: "100%",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                position: "absolute",
+                left: 0,
+                top: 45,
+                paddingHorizontal: 15,
+                zIndex: 999
+            }}
+        >
             <Text
                 style={{
                     fontFamily: "LuckiestGuyRegular"
@@ -21,9 +39,9 @@ const Home = () => {
             >
                 Norva
             </Text>
-            <TouchableOpacity
+            <AnimatedPressable
                 onPress={() => router.push("/chats/ChatList")}
-                activeOpacity={0.7}
+                scaleTo={0.88}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 className="relative"
             >
@@ -39,8 +57,8 @@ const Home = () => {
                         </Text>
                     </View>
                 )}
-            </TouchableOpacity>
-        </View>
+            </AnimatedPressable>
+        </EaseView>
     );
 };
 

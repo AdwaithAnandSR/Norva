@@ -12,7 +12,8 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather, AntDesign } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import Animated from "react-native-reanimated";
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withSequence } from "react-native-reanimated";
+import { EaseView } from "react-native-ease";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { setLike, deletePost } from "../../controllers/post/feed.controller.js";
@@ -24,6 +25,7 @@ import HeartAnim from "../common/HeartAnim.tsx";
 import PostOptions from "./PostOptions.jsx";
 import FollowButton from "./FollowButton.jsx";
 import InitialsAvatar from "../search/InitialsAvatar.jsx";
+import AnimatedPressable from "../common/AnimatedPressable.jsx";
 
 const blurhash = "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azay";
 const AImage = Animated.createAnimatedComponent(Image);
@@ -195,7 +197,11 @@ const PostCard = ({ post }) => {
             }}
             delayLongPress={400}
         >
-            <View
+            <EaseView
+                initialAnimate={{ opacity: 0, translateY: 16, scale: 0.97 }}
+                animate={{ opacity: 1, translateY: 0, scale: 1 }}
+                transition={{ type: "spring", damping: 22, stiffness: 220 }}
+                useHardwareLayer={true}
                 className="w-full bg-card/60 rounded-[20px] mb-4 overflow-hidden border border-border self-center"
                 style={{
                     shadowColor: "#6437ff",
@@ -244,16 +250,17 @@ const PostCard = ({ post }) => {
                         )}
 
                         {/* Options */}
-                        <TouchableOpacity
+                        <AnimatedPressable
                             onPress={() => setOptionsVisible(true)}
                             hitSlop={12}
+                            scaleTo={0.85}
                         >
                             <Feather
                                 name="more-horizontal"
                                 size={20}
                                 color="#555"
                             />
-                        </TouchableOpacity>
+                        </AnimatedPressable>
                     </View>
                 </View>
 
@@ -330,10 +337,10 @@ const PostCard = ({ post }) => {
 
                 {/* Actions */}
                 <View className="flex-row gap-4 px-3.5 py-3.5">
-                    <TouchableOpacity
+                    <AnimatedPressable
                         className="flex-row items-center gap-1"
                         onPress={() => handleLike(false)}
-                        activeOpacity={0.7}
+                        scaleTo={0.88}
                     >
                         <AntDesign
                             name="heart"
@@ -350,12 +357,12 @@ const PostCard = ({ post }) => {
                         >
                             {likesCount}
                         </Text>
-                    </TouchableOpacity>
+                    </AnimatedPressable>
 
-                    <TouchableOpacity
+                    <AnimatedPressable
                         className="flex-row items-center gap-1"
                         onPress={handleOpenComments}
-                        activeOpacity={0.7}
+                        scaleTo={0.88}
                     >
                         <Feather
                             name="message-circle"
@@ -368,7 +375,7 @@ const PostCard = ({ post }) => {
                         >
                             {commentsCount}
                         </Text>
-                    </TouchableOpacity>
+                    </AnimatedPressable>
 
                     <View className="flex-row items-center gap-1">
                         <Feather name="eye" size={18} color="#c4c4e0" />
@@ -380,7 +387,7 @@ const PostCard = ({ post }) => {
                         </Text>
                     </View>
                 </View>
-            </View>
+            </EaseView>
 
             <PostOptions
                 visible={optionsVisible}

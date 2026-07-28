@@ -1,16 +1,16 @@
 import "../global.css";
 
+import React, { useEffect } from "react";
 import { Stack } from "expo-router";
 import { View } from "react-native";
-import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
 import {
     QueryClient,
     QueryClientProvider,
     useQueryClient
 } from "@tanstack/react-query";
+import { useFonts } from "expo-font";
 
-import React, { useEffect } from "react";
 import { useUser } from "../store/user.store.js";
 import Toast from "../components/common/Toast.jsx";
 import { connectSocket } from "../utils/socket.js";

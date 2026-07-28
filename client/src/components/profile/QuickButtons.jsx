@@ -1,8 +1,10 @@
-import { View, TouchableOpacity, Text } from "react-native";
+import { View, Text } from "react-native";
 import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { Feather } from "@expo/vector-icons";
+import { EaseView } from "react-native-ease";
 import { buttonGlow } from "@constants/style.js";
+import AnimatedPressable from "../common/AnimatedPressable.jsx";
 
 const QuickButtons = ({ hasNoPosts }) => {
     const handleEdit = () => {
@@ -16,8 +18,15 @@ const QuickButtons = ({ hasNoPosts }) => {
     };
 
     return (
-        <View style={{ gap: 10, marginTop: 12, paddingHorizontal: 24 }}>
-            <TouchableOpacity
+        <EaseView
+            initialAnimate={{ opacity: 0, translateY: 15 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: "spring", damping: 20, stiffness: 200 }}
+            useHardwareLayer={true}
+            style={{ gap: 10, marginTop: 12, paddingHorizontal: 24 }}
+        >
+            <AnimatedPressable
+                scaleTo={0.95}
                 style={[
                     buttonGlow,
                     {
@@ -43,10 +52,11 @@ const QuickButtons = ({ hasNoPosts }) => {
                 >
                     Edit Profile
                 </Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
 
             {hasNoPosts && (
-                <TouchableOpacity
+                <AnimatedPressable
+                    scaleTo={0.95}
                     style={[
                         buttonGlow,
                         {
@@ -69,9 +79,9 @@ const QuickButtons = ({ hasNoPosts }) => {
                     >
                         Create My First Post
                     </Text>
-                </TouchableOpacity>
+                </AnimatedPressable>
             )}
-        </View>
+        </EaseView>
     );
 };
 

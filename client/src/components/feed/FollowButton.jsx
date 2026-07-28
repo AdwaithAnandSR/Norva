@@ -1,15 +1,16 @@
 import React, { memo } from "react";
-import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { Text, StyleSheet } from "react-native";
 import { useFollow } from "../../hooks/user/useFollow.js";
+import AnimatedPressable from "../common/AnimatedPressable.jsx";
 
 const FollowButton = ({ userId, style, textStyle }) => {
     const { isFollowing, toggle, isPending } = useFollow(userId);
 
     return (
-        <TouchableOpacity
-            activeOpacity={0.7}
+        <AnimatedPressable
             onPress={toggle}
             disabled={isPending}
+            scaleTo={0.92}
             style={[
                 styles.button,
                 isFollowing ? styles.followingButton : styles.followButton,
@@ -25,7 +26,7 @@ const FollowButton = ({ userId, style, textStyle }) => {
             >
                 {isFollowing ? "Following" : "Follow"}
             </Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
     );
 };
 

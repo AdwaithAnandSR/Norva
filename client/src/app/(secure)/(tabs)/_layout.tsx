@@ -1,49 +1,95 @@
-import { NativeTabs } from "expo-router/unstable-native-tabs";
+import { Tabs, useSegments } from "expo-router";
+import { StyleSheet, View } from "react-native";
 import { useResolveClassNames } from "uniwind";
-import { useSegments } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function TabsLayout() {
-    const {
-        backgroundColor,
-        color: iconColor,
-        borderColor: indicatorColor
-    } = useResolveClassNames(
-        "bg-primary text-text-secondary border-card-selected"
-    );
+    const { color: iconColor, borderColor: indicatorColor } =
+        useResolveClassNames("text-text-secondary border-btn/90"); // Removed bg-primary since we are using BlurView for the background
 
-    const currentRoute = useSegments().at(-1);
-    const hidden = currentRoute === "Feeds";
+    const segments = useSegments();
+    const currentRoute = segments[segments.length - 1];
+    const isHidden = currentRoute === "Feeds";
 
     return (
-        <NativeTabs
-        disableAutomaticContentInsets
-            hidden={hidden}
-            backgroundColor={backgroundColor}
-            iconColor={iconColor}
-            indicatorColor={indicatorColor}
+        <Tabs
+            screenOptions={{
+                headerShown: false,
+                tabBarShowLabel: false,
+                tabBarActiveTintColor: indicatorColor,
+                tabBarInactiveTintColor: iconColor,
+                tabBarStyle: [
+                    styles.floatingTabBar,
+                    isHidden && { display: "none" }
+                ]
+            }}
         >
-            <NativeTabs.Trigger name="index">
-                <NativeTabs.Trigger.Icon
-                    sf={{ default: "house", selected: "house.fill" }}
-                    md="home"
-                />
-                <NativeTabs.Trigger.Label hidden />
-            </NativeTabs.Trigger>
+            <Tabs.Screen
+                name="index"
+                options={{
+                    tabBarIcon: ({ color, focused }) => (
+                        <Ionicons
+                            name={focused ? "home" : "home-outline"}
+                            size={26}
+                            color={color}
+                        />
+                    )
+                }}
+            />
 
-            <NativeTabs.Trigger name="Search">
-                <NativeTabs.Trigger.Icon sf="magnifyingglass" md="search" />
-                <NativeTabs.Trigger.Label hidden />
-            </NativeTabs.Trigger>
+            <Tabs.Screen
+                name="Search"
+                options={{
+                    tabBarIcon: ({ color, focused }) => (
+                        <Ionicons
+                            name={focused ? "search" : "search-outline"}
+                            size={26}
+                            color={color}
+                        />
+                    )
+                }}
+            />
 
-            <NativeTabs.Trigger name="Feeds">
-                <NativeTabs.Trigger.Icon sf="film" md="movie" />
-                <NativeTabs.Trigger.Label hidden />
-            </NativeTabs.Trigger>
+            <Tabs.Screen
+                name="Feeds"
+                options={{
+                    tabBarIcon: ({ color, focused }) => (
+                        <Ionicons
+                            name={focused ? "film" : "film-outline"}
+                            size={26}
+                            color={color}
+                        />
+                    )
+                }}
+            />
 
-            <NativeTabs.Trigger name="Profile">
-                <NativeTabs.Trigger.Icon sf="person" md="person" />
-                <NativeTabs.Trigger.Label hidden />
-            </NativeTabs.Trigger>
-        </NativeTabs>
+            <Tabs.Screen
+                name="Profile"
+                options={{
+                    tabBarIcon: ({ color, focused }) => (
+                        <Ionicons
+                            name={focused ? "person" : "person-outline"}
+                            size={26}
+                            color={color}
+                        />
+                    )
+                }}
+            />
+        </Tabs>
     );
 }
+
+const styles = StyleSheet.create({
+    floatingTabBar: {
+        position: "absolute",
+        bottom: 10,
+        height: 65,
+        width: "90%",
+        marginLeft: "5%",
+        borderRadius: 35,
+        borderTopWidth: 0,
+        paddingTop: 10,
+        backgroundColor: "#03030894",
+        elevation: 0
+    }
+});

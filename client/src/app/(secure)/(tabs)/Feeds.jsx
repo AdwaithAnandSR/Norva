@@ -91,6 +91,7 @@ const Reels = () => {
                 pointerEvents="box-none"
             >
                 <Text
+                onLongPress={()=> router.back()}
                     className="text-white text-2xl"
                     style={{ fontFamily: "LuckiestGuyRegular" }}
                 >

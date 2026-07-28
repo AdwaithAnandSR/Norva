@@ -4,7 +4,7 @@ import {
     Text,
     TouchableOpacity,
     Pressable,
-    Dimensions
+    useWindowDimensions
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather, AntDesign, Ionicons } from "@expo/vector-icons";
@@ -24,10 +24,13 @@ import { useUser } from "../../store/user.store.js";
 import { useComments } from "../../store/comment.store.js";
 import { useApp } from "../../store/app.store.js";
 
-const { height: vh } = Dimensions.get("window");
 const DOUBLE_TAP_DELAY = 300;
 
 const ReelCard = ({ post, isActive, pageHeight }) => {
+    // 1. Better height calculation to avoid screen gaps
+    const { height: windowHeight } = useWindowDimensions();
+    const finalHeight = pageHeight || windowHeight;
+
     const currentUserId = useUser(state => state.userId);
     const onOpen = useComments(state => state.onOpen);
     const setOnCommentAdded = useComments(state => state.setOnCommentAdded);
@@ -36,7 +39,7 @@ const ReelCard = ({ post, isActive, pageHeight }) => {
     const qc = useQueryClient();
     const insets = useSafeAreaInsets();
 
-    const top = vh - insets.top;
+    const top = windowHeight - insets.top;
 
     const heartRef = useRef(null);
     const lastPress = useRef(0);
@@ -150,8 +153,9 @@ const ReelCard = ({ post, isActive, pageHeight }) => {
         <View
             style={{
                 width: "100%",
-                height: pageHeight,
-                backgroundColor: "#000"
+                height: finalHeight,
+                backgroundColor: "#000",
+                overflow: "hidden" // 2. Prevents any bleeding from this component container
             }}
         >
             <Pressable
@@ -208,7 +212,7 @@ const ReelCard = ({ post, isActive, pageHeight }) => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        height: pageHeight,
+                        top: 0, // 3. Replaced height: pageHeight with top: 0 to adapt perfectly
                         pointerEvents: "none"
                     }}
                 />
@@ -222,7 +226,8 @@ const ReelCard = ({ post, isActive, pageHeight }) => {
                 <TouchableOpacity
                     activeOpacity={0.7}
                     onPress={() =>
-                        author?._id && router.push(`/(UserProfile)/${author._id}`)
+                        author?._id &&
+                        router.push(`/(UserProfile)/${author._id}`)
                     }
                     className="flex-row items-center gap-2 mb-2"
                 >
