@@ -11,6 +11,7 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose_8-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Socket.io](https://img.shields.io/badge/Socket.io-4.8-010101?style=for-the-badge&logo=socket.io&logoColor=white)](https://socket.io/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Watch Demo](https://img.shields.io/badge/🎬%20Watch_Demo_Video-Google_Drive-4285F4?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/10padADGu13Lavtp4S9j4BVngUM9zenc_/view?usp=drivesdk)
 
 </div>
 
@@ -21,6 +22,24 @@
 **Norva** is a high-performance, full-stack social media application platform designed for real-time interaction, rich media sharing, and seamless user experiences across iOS, Android, and Web.
 
 Engineered with a modern mobile frontend architecture powered by **Expo Router**, **TanStack React Query**, **Zustand**, and **MMKV**, coupled with a robust **Express 5** backend featuring **WebSockets**, **MongoDB**, and **Cloudinary** media infrastructure.
+
+---
+
+## 🎬 App Video Demo
+
+<div align="center">
+
+[![Watch Full Demo Clip](https://img.shields.io/badge/▶%20Play_Edited_App_Demo-Google_Drive-4285F4?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/10padADGu13Lavtp4S9j4BVngUM9zenc_/view?usp=drivesdk)
+
+<br /><br />
+
+[<img src="images/33451.jpg" width="280" alt="Watch Norva App Video Demo" />](https://drive.google.com/file/d/10padADGu13Lavtp4S9j4BVngUM9zenc_/view?usp=drivesdk)
+
+<br />
+
+> 🍿 **[Click here to watch the full edited video demo on Google Drive](https://drive.google.com/file/d/10padADGu13Lavtp4S9j4BVngUM9zenc_/view?usp=drivesdk)**
+
+</div>
 
 ---
 
