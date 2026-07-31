@@ -24,6 +24,24 @@ Engineered with a modern mobile frontend architecture powered by **Expo Router**
 
 ---
 
+## 📱 Screenshots
+
+<div align="center">
+
+| Splash Screen | Home Feed | Search | Reels |
+| :---: | :---: | :---: | :---: |
+| <img src="images/33448.jpg" width="220" alt="Splash Screen" /> | <img src="images/33449.jpg" width="220" alt="Home Feed" /> | <img src="images/33450.jpg" width="220" alt="Search" /> | <img src="images/33451.jpg" width="220" alt="Reels" /> |
+
+<br />
+
+| User Profile | Direct Messages | Chat Conversation |
+| :---: | :---: | :---: |
+| <img src="images/33452.jpg" width="220" alt="User Profile" /> | <img src="images/33453.jpg" width="220" alt="Direct Messages" /> | <img src="images/33454.jpg" width="220" alt="Chat Conversation" /> |
+
+</div>
+
+---
+
 ## ✨ Features
 
 - 🔐 **Secure Authentication**: JWT-based access & refresh token strategy with server-side JTI revocation blacklisting.
