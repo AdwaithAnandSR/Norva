@@ -10,6 +10,7 @@ import {
     createFeed,
     getFeed,
     deletePost,
+    getReels,
     editPost,
     incrementViews
 } from "../controllers/feed/feed.js";
@@ -17,11 +18,12 @@ import {
     getComments,
     comment,
     likeComment,
-    replies
+    replies, deleteComment
 } from "../controllers/feed/comment.js";
 
 router.post("/create", createFeed);
 router.post("/getFeed", getFeed);
+router.post("/getReels", getReels);
 router.delete("/:id", deletePost);
 router.patch("/:id", editPost);
 router.post("/:id/view", incrementViews);
@@ -37,5 +39,7 @@ router.post("/:postId/comments", comment);
 router.post("/comment/:commentId/like", likeComment);
 
 router.get("/comment/:commentId/replies", replies);
+
+router.delete("/comment/:commentId", deleteComment);
 
 export default router;

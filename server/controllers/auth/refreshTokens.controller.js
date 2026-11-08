@@ -8,8 +8,6 @@ const refreshTokens = async (req, res) => {
     try {
         const { refreshToken } = req.body;
         
-        console.log("refreshing ")
-
         if (!refreshToken) {
             return res.status(401).json({
                 success: false,

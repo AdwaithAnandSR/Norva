@@ -1,4 +1,6 @@
 import Post from "../../models/post.models.js";
+import User from "../../models/user.models.js";
+import { sendLikeNotification } from "../../services/notification.service.js";
 
 export const like = async (req, res) => {
     try {
@@ -29,6 +31,22 @@ export const like = async (req, res) => {
         post.likesCount += 1;
 
         await post.save();
+
+        if (post.userId && post.userId.toString() !== userId) {
+            User.findById(userId)
+                .select("username fullname")
+                .lean()
+                .then(liker => {
+                    if (liker) {
+                        sendLikeNotification({
+                            recipientId: post.userId,
+                            likerName: liker.fullname || liker.username,
+                            postId: id
+                        }).catch(err => console.error("Like notification error:", err));
+                    }
+                })
+                .catch(err => console.error("Fetch liker error:", err));
+        }
 
         return res.status(200).json({
             success: true,

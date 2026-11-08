@@ -4,7 +4,7 @@ import { storage, storeSession, revokeSession } from "../storage/storage.js";
 
 import { useUser } from "../store/user.store.js";
 
-const API_URL = "http://192.168.87.7:3000";
+const API_URL = "https://norva-ten.vercel.app";
 
 const api = axios.create({
     baseURL: API_URL,
@@ -37,9 +37,7 @@ api.interceptors.response.use(
     response => response,
 
     async error => {
-        const originalRequest = error.config
-        
-        console.log(error.response.data)
+        const originalRequest = error.config;
 
         if (error.response?.status !== 401 || originalRequest._retry) {
             return Promise.reject(error);
@@ -67,16 +65,12 @@ api.interceptors.response.use(
                 throw new Error("NO_REFRESH_TOKEN");
             }
 
-            console.log("refreshing");
-
             const response = await axios.post(`${API_URL}/auth/refreshTokens`, {
                 refreshToken
             });
 
             const { accessToken, refreshToken: newRefreshToken } =
                 response.data;
-
-            console.log(accessToken, newRefreshToken);
 
             storeSession({
                 accessToken,

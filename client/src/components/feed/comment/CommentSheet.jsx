@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View } from "react-native";
+import { View, Keyboard } from "react-native";
 import Animated from "react-native-reanimated";
 
 import CommentList from "./CommentList.jsx";
@@ -8,7 +8,6 @@ import ReplyBanner from "./ReplyBanner.jsx";
 import SheetBackdrop from "./SheetBackdrop.jsx";
 
 import { useComments } from "../../../store/comment.store.js";
-
 import { useCommentSheetAnimation } from "../../../hooks/comment/useCommentSheetAnimation.js";
 import { useCommentsQuery } from "../../../hooks/comment/useCommentQuery.js";
 import { useCommentSubmit } from "../../../hooks/comment/useCommentSubmit.js";
@@ -21,22 +20,35 @@ const CommentSheet = () => {
 
     const [text, setText] = useState("");
     const [replyingTo, setReplyingTo] = useState(null);
+    const [expandedCommentIds, setExpandedCommentIds] = useState(new Set());
 
     const { sheetStyle, backdropStyle } = useCommentSheetAnimation(visible);
-
     const commentsQuery = useCommentsQuery(postId, visible && !!postId);
+
+    const expandRepliesFor = commentId => {
+        setExpandedCommentIds(prev => new Set(prev).add(commentId));
+    };
+
+    const toggleExpand = commentId => {
+        setExpandedCommentIds(prev => {
+            const next = new Set(prev);
+            if (next.has(commentId)) {
+                next.delete(commentId);
+            } else {
+                next.add(commentId);
+            }
+            return next;
+        });
+    };
 
     const resetInput = () => {
         setText("");
         setReplyingTo(null);
     };
 
-    const handleReply = comment => {
-        setReplyingTo(comment);
-    };
-
-    const cancelReply = () => {
-        setReplyingTo(null);
+    const handleClose = () => {
+        Keyboard.dismiss();
+        onClose();
     };
 
     const submitMutation = useCommentSubmit({
@@ -44,7 +56,8 @@ const CommentSheet = () => {
         text,
         replyingTo,
         resetInput,
-        onCommentAdded
+        onCommentAdded,
+        expandRepliesFor
     });
 
     if (!visible) return null;
@@ -61,7 +74,10 @@ const CommentSheet = () => {
             }}
             pointerEvents="box-none"
         >
-            <SheetBackdrop backdropStyle={backdropStyle} onClose={onClose} />
+            <SheetBackdrop
+                backdropStyle={backdropStyle}
+                onClose={handleClose}
+            />
 
             <Animated.View
                 style={[
@@ -74,17 +90,25 @@ const CommentSheet = () => {
                         borderTopLeftRadius: 28,
                         borderTopRightRadius: 28,
                         overflow: "hidden",
-                        backgroundColor: "#121212"
+                        backgroundColor: "#121212",
+                        display: "flex",
+                        flexDirection: "column"
                     },
                     sheetStyle
                 ]}
             >
                 <CommentList
                     commentsQuery={commentsQuery}
-                    onReply={handleReply}
+                    onReply={setReplyingTo}
+                    expandedCommentIds={expandedCommentIds}
+                    toggleExpand={toggleExpand}
+                    postId={postId}
                 />
 
-                <ReplyBanner replyingTo={replyingTo} onCancel={cancelReply} />
+                <ReplyBanner
+                    replyingTo={replyingTo}
+                    onCancel={() => setReplyingTo(null)}
+                />
 
                 <CommentInput
                     text={text}

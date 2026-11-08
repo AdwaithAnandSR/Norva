@@ -14,7 +14,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { Feather } from "@expo/vector-icons";
 
-import { editPost } from "../../../controllers/post/feed.controller.js";
+import { editPost } from "../../../../controllers/post/feed.controller.js";
 
 const EditPost = () => {
     const {
@@ -39,10 +39,41 @@ const EditPost = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    const toHashtag = str =>
+        str
+            .trim()
+            .replace(/^#/, "")
+            .split(/\s+/)
+            .map(
+                word =>
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            )
+            .join("");
+
     const addTag = () => {
-        const cleaned = tagInput.trim().toLowerCase().replace(/^#/, "");
-        if (!cleaned || tags.includes(cleaned) || tags.length >= 6) return;
-        setTags(prev => [...prev, cleaned]);
+        const newTags = tagInput.includes("#")
+            ? // "#winter #fashion #winter vibes"
+              tagInput.match(/#([^\s#,][^#,\n]*)/g)?.map(tag => toHashtag(tag))
+            : // "winter fashion, fashion reel, editorial"
+              tagInput.split(",").map(toHashtag);
+
+        if (!newTags?.length) return;
+
+        setTags(prev => {
+            const result = [...prev];
+            const existing = new Set(prev);
+
+            for (const tag of newTags) {
+                if (result.length >= 10) break;
+                if (!existing.has(tag)) {
+                    existing.add(tag);
+                    result.push(tag);
+                }
+            }
+
+            return result;
+        });
+
         setTagInput("");
     };
 
@@ -83,7 +114,7 @@ const EditPost = () => {
                 };
             });
 
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             router.back();
         } catch {
             setError("Failed to save. Try again.");
@@ -93,10 +124,7 @@ const EditPost = () => {
     };
 
     return (
-        <KeyboardAvoidingView
-            className="flex-1 bg-primary"
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
+        <KeyboardAvoidingView className="flex-1 bg-primary">
             <ScrollView
                 className="flex-1"
                 contentContainerStyle={{ padding: 20, paddingBottom: 60 }}

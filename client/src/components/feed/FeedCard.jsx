@@ -4,7 +4,8 @@ import {
     TouchableOpacity,
     Pressable,
     Image as RNImage,
-    Dimensions
+    Dimensions,
+    StyleSheet
 } from "react-native";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Image } from "expo-image";
@@ -12,7 +13,8 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather, AntDesign } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import Animated from "react-native-reanimated";
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withSequence } from "react-native-reanimated";
+import { EaseView } from "react-native-ease";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { setLike, deletePost } from "../../controllers/post/feed.controller.js";
@@ -23,6 +25,8 @@ import { useComments } from "../../store/comment.store.js";
 import HeartAnim from "../common/HeartAnim.tsx";
 import PostOptions from "./PostOptions.jsx";
 import FollowButton from "./FollowButton.jsx";
+import InitialsAvatar from "../search/InitialsAvatar.jsx";
+import AnimatedPressable from "../common/AnimatedPressable.jsx";
 
 const blurhash = "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azay";
 const AImage = Animated.createAnimatedComponent(Image);
@@ -131,7 +135,14 @@ const PostCard = ({ post }) => {
                 navigating.current = true;
                 router.push({
                     pathname: "/FullScreenImage",
-                    params: { postId: post._id, uri: post.url }
+                    params: {
+                        postId: post._id,
+                        uri: post.url,
+                        title: post.title ?? "",
+                        description: post.description ?? "",
+                        tags: JSON.stringify(post.tags ?? []),
+                        userId: typeof post.userId === "object" ? post.userId?._id : post.userId
+                    }
                 });
                 setTimeout(() => {
                     navigating.current = false;
@@ -187,26 +198,29 @@ const PostCard = ({ post }) => {
             }}
             delayLongPress={400}
         >
-            <View
-                className="w-full bg-card/60 rounded-[20px] mb-4 overflow-hidden border border-border self-center"
-                style={{
-                    shadowColor: "#6437ff",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.12,
-                    shadowRadius: 16
-                }}
+            <EaseView
+                initialAnimate={{ opacity: 0, translateY: 16, scale: 0.97 }}
+                animate={{ opacity: 1, translateY: 0, scale: 1 }}
+                transition={{ type: "spring", damping: 22, stiffness: 220 }}
+                useHardwareLayer={true}
+                style={styles.easeView}
             >
                 {/* Author row */}
                 <View className="flex-row items-center justify-between px-3.5 pt-3.5 pb-2.5">
-                    <View className="flex-row items-center gap-[10px]">
-                        <View className="w-10 h-10 rounded-full bg-card-selected border-2 border-btn/30 items-center justify-center">
-                            <Text
-                                className="text-btn text-lg"
-                                style={{ fontFamily: "WinkyRoughExtraBold" }}
-                            >
-                                {author?.fullname?.[0]?.toUpperCase() ?? "?"}
-                            </Text>
-                        </View>
+                    <TouchableOpacity
+                        activeOpacity={0.7}
+                        onPress={() => {
+                            if (author?._id) {
+                                router.push(`/(UserProfile)/${author._id}`);
+                            }
+                        }}
+                        className="flex-row items-center gap-[10px]"
+                    >
+                        <InitialsAvatar
+                            fullname={author?.fullname || author?.username}
+                            profileImage={author?.profileImage}
+                            size={40}
+                        />
                         <View>
                             <Text
                                 className="text-text text-[15px]"
@@ -221,7 +235,7 @@ const PostCard = ({ post }) => {
                                 @{author?.username ?? "unknown"}
                             </Text>
                         </View>
-                    </View>
+                    </TouchableOpacity>
 
                     {/* Options trigger */}
                     <View className="flex-row items-center gap-3">
@@ -231,16 +245,17 @@ const PostCard = ({ post }) => {
                         )}
 
                         {/* Options */}
-                        <TouchableOpacity
+                        <AnimatedPressable
                             onPress={() => setOptionsVisible(true)}
                             hitSlop={12}
+                            scaleTo={0.85}
                         >
                             <Feather
                                 name="more-horizontal"
                                 size={20}
                                 color="#555"
                             />
-                        </TouchableOpacity>
+                        </AnimatedPressable>
                     </View>
                 </View>
 
@@ -317,10 +332,10 @@ const PostCard = ({ post }) => {
 
                 {/* Actions */}
                 <View className="flex-row gap-4 px-3.5 py-3.5">
-                    <TouchableOpacity
+                    <AnimatedPressable
                         className="flex-row items-center gap-1"
                         onPress={() => handleLike(false)}
-                        activeOpacity={0.7}
+                        scaleTo={0.88}
                     >
                         <AntDesign
                             name="heart"
@@ -337,12 +352,12 @@ const PostCard = ({ post }) => {
                         >
                             {likesCount}
                         </Text>
-                    </TouchableOpacity>
+                    </AnimatedPressable>
 
-                    <TouchableOpacity
+                    <AnimatedPressable
                         className="flex-row items-center gap-1"
                         onPress={handleOpenComments}
-                        activeOpacity={0.7}
+                        scaleTo={0.88}
                     >
                         <Feather
                             name="message-circle"
@@ -355,7 +370,7 @@ const PostCard = ({ post }) => {
                         >
                             {commentsCount}
                         </Text>
-                    </TouchableOpacity>
+                    </AnimatedPressable>
 
                     <View className="flex-row items-center gap-1">
                         <Feather name="eye" size={18} color="#c4c4e0" />
@@ -367,7 +382,7 @@ const PostCard = ({ post }) => {
                         </Text>
                     </View>
                 </View>
-            </View>
+            </EaseView>
 
             <PostOptions
                 visible={optionsVisible}
@@ -379,5 +394,22 @@ const PostCard = ({ post }) => {
         </Pressable>
     );
 };
+
+const styles = StyleSheet.create({
+    easeView: {
+        width: "100%",
+        backgroundColor: "rgba(13, 13, 26, 0.6)",
+        borderRadius: 20,
+        marginBottom: 16,
+        overflow: "hidden",
+        borderWidth: 1,
+        borderColor: "rgba(100, 55, 255, 0.12)",
+        alignSelf: "center",
+        shadowColor: "#6437ff",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.12,
+        shadowRadius: 16
+    }
+});
 
 export default PostCard;

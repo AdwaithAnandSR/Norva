@@ -1,66 +1,135 @@
-import { View, Text, TouchableOpacity, Modal, Pressable } from "react-native";
+import { useEffect, useState } from "react";
+import { Modal, Pressable, Text, TouchableOpacity } from "react-native";
+import Animated, {
+    interpolate,
+    runOnJS,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+    withTiming
+} from "react-native-reanimated";
 import { Feather } from "@expo/vector-icons";
 
-const PostOptions = ({ visible, isOwner, onEdit, onDelete, onClose }) => {
-    if (!visible) return null;
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+export default function PostOptions({
+    visible,
+    isOwner,
+    onEdit,
+    onDelete,
+    onClose
+}) {
+    const [mounted, setMounted] = useState(visible);
+    const progress = useSharedValue(0);
+
+    useEffect(() => {
+        if (visible) {
+            setMounted(true);
+
+            progress.value = withSpring(1, {
+                damping: 18,
+                stiffness: 180,
+                mass: 0.8
+            });
+        } else {
+            progress.value = withTiming(0, { duration: 180 }, finished => {
+                if (finished) {
+                    runOnJS(setMounted)(false);
+                }
+            });
+        }
+    }, [visible]);
+
+    const backdropStyle = useAnimatedStyle(() => ({
+        opacity: interpolate(progress.value, [0, 1], [0, 1])
+    }));
+
+    const sheetStyle = useAnimatedStyle(() => ({
+        transform: [
+            {
+                translateY: interpolate(progress.value, [0, 1], [320, 0])
+            },
+            {
+                scale: interpolate(progress.value, [0, 1], [0.98, 1])
+            }
+        ],
+        opacity: progress.value
+    }));
+
+    if (!mounted) return null;
 
     return (
         <Modal
             transparent
-            animationType="fade"
-            visible={visible}
+            animationType="none"
+            visible={mounted}
             onRequestClose={onClose}
         >
-            <Pressable
-                style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.6)" }}
+            <AnimatedPressable
                 onPress={onClose}
+                style={[
+                    {
+                        flex: 1,
+                        backgroundColor: "rgba(0,0,0,0.55)"
+                    },
+                    backdropStyle
+                ]}
             >
-                <View className="absolute bottom-0 left-0 right-0 bg-primary/85 rounded-t-2xl pb-5 pt-3 ">
+                <Animated.View
+                    style={sheetStyle}
+                    className="absolute bottom-0 left-0 right-0 overflow-hidden rounded-t-[30px] bg-primary/95 py-1"
+                >
+                    {/* Handle */}
+                    <Pressable className="items-center pb-2">
+                        <Animated.View className="h-1.5 w-12 rounded-full bg-white/20" />
+                    </Pressable>
+
                     {isOwner && (
                         <>
-                            <TouchableOpacity
-                                onPress={onEdit}
-                                className="flex-row items-center gap-5 py-4 px-5"
-                            >
-                                <Feather
-                                    name="edit-2"
-                                    size={18}
-                                    color="#c4c4e0"
-                                />
-                                <Text className="text-text/70 font-bold text-xl">
-                                    Edit post
-                                </Text>
-                            </TouchableOpacity>
+                            <Option
+                                icon="edit-2"
+                                text="Edit post"
+                                color="#c4c4e0"
+                                onPress={() => {
+                                    onClose();
+                                    onEdit?.();
+                                }}
+                            />
 
-                            <TouchableOpacity
-                                onPress={onDelete}
-                                className="flex-row items-center gap-5 py-4 px-5"
-                            >
-                                <Feather
-                                    name="trash-2"
-                                    size={18}
-                                    color="#f43f5e"
-                                />
-                                <Text className="text-text/70 font-bold text-xl">
-                                    Delete post
-                                </Text>
-                            </TouchableOpacity>
+                            <Option
+                                icon="trash-2"
+                                text="Delete post"
+                                color="#f43f5e"
+                                onPress={() => {
+                                    onClose();
+                                    onDelete?.();
+                                }}
+                            />
                         </>
                     )}
 
-                    <TouchableOpacity
+                    <Option
+                        icon="x"
+                        text="Cancel"
+                        color="#777"
+                        textClass="text-text/50"
                         onPress={onClose}
-                        className="flex-row items-center gap-5 py-3 mt-2 px-5"
-                    >
-                        <Feather name="x" size={18} color="#666" />
-                        <Text className="text-text/50 font-bold text-xl">
-                            Cancel
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </Pressable>
+                    />
+                </Animated.View>
+            </AnimatedPressable>
         </Modal>
     );
-};
+}
 
-export default PostOptions;
+function Option({ icon, text, color, onPress, textClass = "text-text/80" }) {
+    return (
+        <TouchableOpacity
+            activeOpacity={0.75}
+            onPress={onPress}
+            className="flex-row items-center gap-5 px-6 py-4"
+        >
+            <Feather name={icon} size={20} color={color} />
+            <Text className={`text-lg font-bold ${textClass}`}>{text}</Text>
+        </TouchableOpacity>
+    );
+}

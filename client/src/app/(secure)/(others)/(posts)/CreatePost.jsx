@@ -6,16 +6,17 @@ import {
     TextInput,
     ScrollView
 } from "react-native";
+import { router } from "expo-router";
 
 import { buttonGlow, orangeGlow } from "@constants/style.js";
-import { pickImage } from "../../../utils/imagePick.js";
-import { uploadToCloudinary } from "../../../utils/cloudinary.js";
-import { createPost } from "../../../controllers/post/feed.controller.js";
+import { pickImage } from "../../../../utils/imagePick.js";
+import { uploadToCloudinary } from "../../../../utils/cloudinary.js";
+import { createPost } from "../../../../controllers/post/feed.controller.js";
 
 import {
     Preview as ImagePreview,
     Header
-} from "../../../components/feed/CreatePost.jsx";
+} from "../../../../components/feed/CreatePost.jsx";
 
 const CreatePost = () => {
     const [image, setImage] = useState(null);
@@ -35,7 +36,7 @@ const CreatePost = () => {
 
     const handleCreatePost = async () => {
         setMessage("Creating post, please wait..");
-        setUploadProgress(0)
+        setUploadProgress(0);
         const title = titleValue?.current,
             description = descValue?.current;
         let tags = tagsValue?.current;
@@ -72,7 +73,8 @@ const CreatePost = () => {
             title,
             description,
             tags,
-            media: uploadedMedia
+            media: uploadedMedia,
+            imageDetails: image?.assets?.[0] ?? {}
         });
 
         if (createRes) {
@@ -81,6 +83,7 @@ const CreatePost = () => {
             descValue.current = "";
             tagsValue.current = "";
             setMessage("Successfully created new post");
+            router.back();
         } else setMessage("Failed to create post!");
 
         setUploadProgress(-1);
@@ -92,9 +95,7 @@ const CreatePost = () => {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ flexGrow: 1, paddingBottom: 25 }}
         >
-            <Header
-                handleCreatePost={handleCreatePost}
-            />
+            <Header handleCreatePost={handleCreatePost} />
 
             <View className="gap-3 mt-10 px-2">
                 {message && (

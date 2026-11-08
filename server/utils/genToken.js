@@ -45,6 +45,6 @@ export const genToken = async payload => {
 
         return { accessToken, refreshToken };
     } catch (err) {
-        console.log(`Error while generating tokens: ${err}`);
+        console.error(`Error while generating tokens: ${err}`);
     }
 };

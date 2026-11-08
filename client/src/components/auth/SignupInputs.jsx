@@ -8,6 +8,7 @@ import {
     TouchableOpacity
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { EaseView } from "react-native-ease";
 
 import handleAuth from "../../controllers/auth/auth.controller.js";
 import {
@@ -15,6 +16,7 @@ import {
     isValidPassword
 } from "../../utils/validateAuthData.js";
 import { orangeGlow } from "../../constants/style.js";
+import AnimatedPressable from "../common/AnimatedPressable.jsx";
 
 const { height: vh, width: vw } = Dimensions.get("window");
 
@@ -41,7 +43,13 @@ const SignupInputs = () => {
     });
 
     return (
-        <View style={styles.inputCont}>
+        <EaseView
+            initialAnimate={{ opacity: 0, translateY: 20 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: "spring", damping: 22, stiffness: 200 }}
+            useHardwareLayer={true}
+            style={styles.inputCont}
+        >
             <Text style={styles.infoText}>{message.username}</Text>
             <TextInput
                 style={[
@@ -149,7 +157,7 @@ const SignupInputs = () => {
 
             <Text style={styles.resText}>{message.response}</Text>
 
-            <TouchableOpacity
+            <AnimatedPressable
                 onPress={() => {
                     if (
                         isValidPassword(formData.password, setMessage) &&
@@ -157,11 +165,12 @@ const SignupInputs = () => {
                     )
                         handleAuth(formData, "signup", setMessage);
                 }}
+                scaleTo={0.95}
                 style={[styles.button, orangeGlow]}
             >
                 <Text style={styles.buttonText}>Sign Up</Text>
-            </TouchableOpacity>
-        </View>
+            </AnimatedPressable>
+        </EaseView>
     );
 };
 

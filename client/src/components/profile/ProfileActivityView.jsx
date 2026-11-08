@@ -11,7 +11,13 @@ const Stat = ({ value, label, onPress }) => (
     </TouchableOpacity>
 );
 
-const ProfileActivityView = ({ postsCount, followingCount, followersCount }) => {
+const ProfileActivityView = ({
+    postsCount,
+    followingCount,
+    followersCount,
+    onFollowingPress,
+    onFollowersPress
+}) => {
     return (
         <View
             style={{
@@ -24,11 +30,11 @@ const ProfileActivityView = ({ postsCount, followingCount, followersCount }) => 
                 borderColor: "rgba(255,255,255,0.06)"
             }}
         >
-            <Stat value={postsCount}     label="Posts"     />
+            <Stat value={postsCount} label="Posts" />
             <View style={{ width: 1, height: 32, backgroundColor: "rgba(255,255,255,0.08)" }} />
-            <Stat value={followingCount} label="Following"  />
+            <Stat value={followingCount} label="Following" onPress={onFollowingPress} />
             <View style={{ width: 1, height: 32, backgroundColor: "rgba(255,255,255,0.08)" }} />
-            <Stat value={followersCount} label="Followers"  />
+            <Stat value={followersCount} label="Followers" onPress={onFollowersPress} />
         </View>
     );
 };

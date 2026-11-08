@@ -4,52 +4,59 @@ import User from "../../models/user.models.js";
 
 import { deleteAsset } from "../../utils/cloudinary.js";
 
+// Builds a { createdAt, _id } keyset-pagination filter, merged with any base filter
+const buildCursorQuery = (cursor, base = {}) => ({
+    ...base,
+    ...(cursor
+        ? {
+              $or: [
+                  { createdAt: { $lt: new Date(cursor.createdAt) } },
+                  {
+                      createdAt: new Date(cursor.createdAt),
+                      _id: { $lt: cursor._id }
+                  }
+              ]
+          }
+        : {})
+});
+
+const paginate = async (query, limit) => {
+    const docs = await Post.find(query)
+        .sort({ createdAt: -1, _id: -1 })
+        .limit(limit + 1)
+        .populate("userId", "username fullname profileImage")
+        .lean();
+
+    const hasMore = docs.length > limit;
+    if (hasMore) docs.pop();
+
+    const nextCursor = hasMore
+        ? { createdAt: docs.at(-1)?.createdAt, _id: docs.at(-1)?._id }
+        : null;
+
+    return { docs, hasMore, nextCursor };
+};
+
+const withFollowState = async (docs, myId) => {
+    const me = await User.findById(myId).select("following").lean();
+    const followingSet = new Set(
+        (me?.following ?? []).map(id => id.toString())
+    );
+
+    return docs.map(p => ({
+        ...p,
+        isFollowing: followingSet.has(p.userId?._id?.toString())
+    }));
+};
+
 export const getFeed = async (req, res) => {
     try {
         const limit = Number(req.query.limit ?? 10);
         const { cursor } = req.body;
 
-        const query = cursor
-            ? {
-                  $or: [
-                      { createdAt: { $lt: new Date(cursor.createdAt) } },
-                      {
-                          createdAt: new Date(cursor.createdAt),
-                          _id: { $lt: cursor._id }
-                      }
-                  ]
-              }
-            : {};
-
-        const posts = await Post.find(query)
-            .sort({ createdAt: -1, _id: -1 })
-            .limit(limit + 1)
-            .populate("userId", "username fullname")
-            .lean();
-
-        const hasMore = posts.length > limit;
-
-        if (hasMore) posts.pop();
-
-        const nextCursor = hasMore
-            ? {
-                  createdAt: posts.at(-1)?.createdAt,
-                  _id: posts.at(-1)?._id
-              }
-            : null;
-
-        const myId = req.user.userId;
-
-        const me = await User.findById(myId).select("following").lean();
-
-        const followingSet = new Set(
-            (me?.following ?? []).map(id => id.toString())
-        );
-
-        const enriched = posts.map(p => ({
-            ...p,
-            isFollowing: followingSet.has(p.userId?._id?.toString())
-        }));
+        const query = buildCursorQuery(cursor, { mediaType: { $ne: "video" } });
+        const { docs, hasMore, nextCursor } = await paginate(query, limit);
+        const enriched = await withFollowState(docs, req.user.userId);
 
         return res.status(200).json({
             success: true,
@@ -59,6 +66,31 @@ export const getFeed = async (req, res) => {
         });
     } catch (error) {
         console.error("getFeed error:", error);
+
+        return res.status(500).json({
+            success: false
+        });
+    }
+};
+
+// Reels tab — same cursor-pagination shape as getFeed, restricted to video posts
+export const getReels = async (req, res) => {
+    try {
+        const limit = Number(req.query.limit ?? 6);
+        const { cursor } = req.body;
+
+        const query = buildCursorQuery(cursor, { mediaType: "video" });
+        const { docs, hasMore, nextCursor } = await paginate(query, limit);
+        const enriched = await withFollowState(docs, req.user.userId);
+
+        return res.status(200).json({
+            success: true,
+            posts: enriched,
+            nextCursor,
+            hasMore
+        });
+    } catch (error) {
+        console.error("getReels error:", error);
 
         return res.status(500).json({
             success: false
@@ -128,7 +160,7 @@ export const editPost = async (req, res) => {
         const { id } = req.params;
         const userId = req.user.userId;
         const { title, description, tags } = req.body;
-
+        
         const post = await Post.findById(id);
         if (!post)
             return res

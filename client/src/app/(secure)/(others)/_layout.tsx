@@ -6,6 +6,10 @@ const Layout = () => {
             screenOptions={{
                 headerShown: false
             }}
+            style={{
+                flex: 1,
+                backgroundColor: "black"
+            }}
         />
     );
 };

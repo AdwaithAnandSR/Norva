@@ -1,16 +1,31 @@
 import { useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
 import { toggleCommentLike } from "../../../controllers/post/comment.controller.js";
+import { useCommentDelete } from "../../../hooks/comment/useCommentDelete.js";
+import { useUser } from "../../../store/user.store.js"; // Adjust path to your auth store
 
-const CommentCard = ({ comment, onReply, isReply = false }) => {
+const CommentCard = ({
+    comment,
+    postId,
+    onReply,
+    isReply = false,
+    parentId = null
+}) => {
     const author = comment.userId;
+    const currentUserId = useUser(state => state.userId); // Fetch current logged-in user ID
+    const isMyComment = currentUserId && author?._id === currentUserId;
 
     const [liked, setLiked] = useState(comment.likedByMe ?? false);
     const [likesCount, setLikesCount] = useState(comment.likesCount ?? 0);
     const [likeLoading, setLikeLoading] = useState(false);
+
+    const deleteMutation = useCommentDelete({
+        postId,
+        parentId: isReply ? parentId : null
+    });
 
     const handleLike = async () => {
         if (likeLoading) return;
@@ -31,8 +46,31 @@ const CommentCard = ({ comment, onReply, isReply = false }) => {
         }
     };
 
+    const handleLongPress = () => {
+        // Only trigger deletion modal if it's the user's own comment
+        if (!isMyComment) return;
+
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+        Alert.alert(
+            "Delete Comment",
+            "Are you sure you want to delete this comment?",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: () => deleteMutation.mutate(comment._id)
+                }
+            ]
+        );
+    };
+
     return (
-        <View
+        <TouchableOpacity
+            activeOpacity={0.9}
+            onLongPress={handleLongPress}
+            delayLongPress={250}
             className={`flex-row gap-2.5 ${isReply ? "pl-10 pt-2" : "pt-3.5"}`}
         >
             {/* Avatar */}
@@ -55,13 +93,12 @@ const CommentCard = ({ comment, onReply, isReply = false }) => {
                 </Text>
             </View>
 
-            {/* Bubble */}
+            {/* Bubble & Actions */}
             <View className="flex-1">
                 <View
                     className="bg-card-selected rounded-2xl px-3 py-2.5"
                     style={{ borderTopLeftRadius: 4 }}
                 >
-                    {/* Name row */}
                     <View className="flex-row items-center gap-1.5 mb-1">
                         <Text
                             className="text-text text-[13px]"
@@ -77,7 +114,6 @@ const CommentCard = ({ comment, onReply, isReply = false }) => {
                         </Text>
                     </View>
 
-                    {/* Content */}
                     <Text
                         className="text-text-secondary text-[13px] leading-[19px]"
                         style={{ fontFamily: "SpaceMono" }}
@@ -86,9 +122,8 @@ const CommentCard = ({ comment, onReply, isReply = false }) => {
                     </Text>
                 </View>
 
-                {/* Actions below bubble */}
+                {/* Actions */}
                 <View className="flex-row items-center gap-4 mt-1.5 px-1">
-                    {/* Like */}
                     <TouchableOpacity
                         className="flex-row items-center gap-1"
                         onPress={handleLike}
@@ -114,7 +149,6 @@ const CommentCard = ({ comment, onReply, isReply = false }) => {
                         )}
                     </TouchableOpacity>
 
-                    {/* Reply — only on top-level comments */}
                     {!isReply && (
                         <TouchableOpacity
                             onPress={() => onReply?.(comment)}
@@ -133,7 +167,7 @@ const CommentCard = ({ comment, onReply, isReply = false }) => {
                     )}
                 </View>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 };
 

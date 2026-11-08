@@ -54,3 +54,12 @@ export const fetchReplies = async ({
     });
     return data; // { success, replies, nextCursor, hasMore }
 };
+
+/**
+ * Delete a comment or reply by ID.
+ * @param {string} commentId
+ */
+export const deleteComment = async commentId => {
+    const { data } = await api.delete(`/post/comment/${commentId}`);
+    return data; // { success, message }
+};

@@ -1,0 +1,29 @@
+{
+    "project_info": {
+        "project_number": "71105525739",
+        "project_id": "norva-social",
+        "storage_bucket": "norva-social.firebasestorage.app"
+    },
+    "client": [
+        {
+            "client_info": {
+                "mobilesdk_app_id": "1:71105525739:android:e6197af92d38bb1d7f8bae",
+                "android_client_info": {
+                    "package_name": "com.adwaithananddev.Norva"
+                }
+            },
+            "oauth_client": [],
+            "api_key": [
+                {
+                    "current_key": "AIzaSyB1T1cKM60dr8xft24yYtBL4DvIhOwTm3E"
+                }
+            ],
+            "services": {
+                "appinvite_service": {
+                    "other_platform_oauth_client": []
+                }
+            }
+        }
+    ],
+    "configuration_version": "1"
+}

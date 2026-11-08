@@ -166,7 +166,7 @@ const Home = () => {
                 }
                 className="pt-24"
                 contentContainerStyle={{
-                    paddingBottom: 200
+                    paddingBottom: 150
                 }}
                 refreshing={isRefetching}
                 onRefresh={refetch}

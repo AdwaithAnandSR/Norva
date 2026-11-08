@@ -1,61 +1,174 @@
-import React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { useRef, useState, useEffect, useCallback } from "react";
+import { View, Text, TouchableOpacity } from "react-native";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { FlashList } from "@shopify/flash-list";
+import { router, useFocusEffect, useIsFocused } from "expo-router";
+import { Feather } from "@expo/vector-icons";
+import Loader from "../../../components/common/Loader";
+import ReelCard from "../../../components/feed/ReelCard.jsx";
+import CommentSheet from "../../../components/feed/comment/CommentSheet.jsx";
 
-export default function App() {
+import {
+    fetchReels,
+    incrementView
+} from "../../../controllers/post/feed.controller.js";
+import { useFollowStore } from "../../../store/follow.store.js";
+
+const LIMIT = 6;
+
+const useReels = () =>
+    useInfiniteQuery({
+        queryKey: ["reels"],
+        queryFn: ({ pageParam }) =>
+            fetchReels({ cursor: pageParam, limit: LIMIT }),
+        initialPageParam: null,
+        getNextPageParam: lastPage =>
+            lastPage.hasMore ? lastPage.nextCursor : undefined,
+        staleTime: 1000 * 60 * 2
+    });
+
+const Reels = () => {
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading,
+        isError,
+        refetch,
+        isRefetching
+    } = useReels();
+
+    const isFocused = useIsFocused();
+    const seedFromPosts = useFollowStore(s => s.seedFromPosts);
+
+    const reels = data?.pages.flatMap(p => p.posts) ?? [];
+    const viewedReels = useRef(new Set());
+
+    const [activeId, setActiveId] = useState(null);
+    const [pageHeight, setPageHeight] = useState(0);
+
+    useEffect(() => {
+        if (reels.length) seedFromPosts(reels);
+    }, [reels]);
+
+
+    const viewabilityConfig = useRef({
+        itemVisiblePercentThreshold: 70,
+        minimumViewTime: 150
+    }).current;
+
+    const onViewableItemsChanged = useRef(({ viewableItems }) => {
+        const top = viewableItems.find(v => v.isViewable);
+
+        if (!top) return;
+
+        setActiveId(top.item._id);
+
+        if (!viewedReels.current.has(top.item._id)) {
+            viewedReels.current.add(top.item._id);
+            incrementView(top.item._id).catch(() => {});
+        }
+    }).current;
+    
+    if (pageHeight === 0) {
+        return (
+            <View
+                className="flex-1 bg-primary"
+                onLayout={e => setPageHeight(e.nativeEvent.layout.height)}
+            />
+        );
+    }
+
     return (
-        <View style={styles.container}>
-            {/* Top Text (Over the image) */}
-            <View style={styles.overlay}>
-                <Text style={styles.textTop}>This is top text</Text>
+        <View
+            className="flex-1 bg-primary"
+            onLayout={e => setPageHeight(e.nativeEvent.layout.height)}
+        >
+            <View
+                className="absolute left-0 right-0 z-20 flex-row items-start justify-between px-4"
+                style={{ top: 56 }}
+                pointerEvents="box-none"
+            >
+                <Text
+                onLongPress={()=> router.back()}
+                    className="text-white text-2xl"
+                    style={{ fontFamily: "LuckiestGuyRegular" }}
+                >
+                    Reels
+                </Text>
+
+                <TouchableOpacity
+                    onPress={() => router.push("/CreatePost")}
+                    hitSlop={10}
+                >
+                    <Feather name="camera" size={24} color="#fff" />
+                </TouchableOpacity>
             </View>
 
-            {/* Image */}
-            <Image
-                source={{
-                    uri: "https://images.media.io/images2023/photo-enhance/banner-after.png"
+            <FlashList
+                data={reels}
+                renderItem={({ item }) => (
+                    <ReelCard
+                        post={item}
+                        pageHeight={pageHeight}
+                        isActive={isFocused && item._id === activeId}
+                    />
+                )}
+                keyExtractor={item => item._id}
+                estimatedItemSize={pageHeight}
+                pagingEnabled
+                refreshing={isRefetching}
+                onRefresh={refetch}
+                showsVerticalScrollIndicator={false}
+                onEndReached={() => {
+                    if (hasNextPage && !isFetchingNextPage) {
+                        fetchNextPage();
+                    }
                 }}
-                style={styles.image}
-                resizeMode="cover"
+                onEndReachedThreshold={1.5}
+                onViewableItemsChanged={onViewableItemsChanged}
+                viewabilityConfig={viewabilityConfig}
+                ListEmptyComponent={
+                    isLoading ? (
+                        <View
+                            style={{
+                                height: pageHeight,
+                                justifyContent: "center",
+                                alignItems: "center"
+                            }}
+                        >
+                            <Loader size="large" />
+                        </View>
+                    ) : isError ? (
+                        <View
+                            style={{
+                                height: pageHeight,
+                                justifyContent: "center",
+                                alignItems: "center"
+                            }}
+                        >
+                            <Text className="text-white" onPress={refetch}>
+                                Tap to retry
+                            </Text>
+                        </View>
+                    ) : (
+                        <View
+                            style={{
+                                height: pageHeight,
+                                justifyContent: "center",
+                                alignItems: "center"
+                            }}
+                        >
+                            <Text className="text-white">No reels yet</Text>
+                        </View>
+                    )
+                }
             />
 
-            {/* Bottom Text (Below the image) */}
-            <Text style={styles.textBottom}>This is bottom text</Text>
+            <CommentSheet />
         </View>
     );
-}
+};
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#fff"
-    },
-    image: {
-        width: 300,
-        height: 200,
-        borderRadius: 10
-    },
-    overlay: {
-        position: "absolute",
-        top: "35%", // adjust as needed
-        left: 0,
-        right: 0,
-        alignItems: "center",
-        zIndex: 2
-    },
-    textTop: {
-        fontSize: 24,
-        fontWeight: "bold",
-        color: "white",
-        backgroundColor: "rgba(0,0,0,0.4)", // Optional: background blur look
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 6
-    },
-    textBottom: {
-        marginTop: 10,
-        fontSize: 18,
-        color: "#333"
-    }
-});
+export default Reels;

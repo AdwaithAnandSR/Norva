@@ -38,6 +38,10 @@ const postSchema = new mongoose.Schema(
             type: String
         },
 
+        height: Number,
+        
+        width: Number,
+
         mediaPublicId: {
             type: String
         },
@@ -58,7 +62,7 @@ const postSchema = new mongoose.Schema(
             type: Number,
             default: 0
         },
-        
+
         views: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
 
         viewsCount: {

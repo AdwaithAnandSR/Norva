@@ -1,5 +1,6 @@
 import Comment from "../../models/comment.models.js";
 import Post from "../../models/post.models.js";
+import { sendCommentNotification } from "../../services/notification.service.js";
 
 export const getComments = async (req, res) => {
     try {
@@ -26,7 +27,7 @@ export const getComments = async (req, res) => {
         const comments = await Comment.find(query)
             .sort({ createdAt: -1, _id: -1 })
             .limit(limit + 1)
-            .populate("userId", "username fullname")
+            .populate("userId", "username fullname profileImage")
             .lean();
 
         const hasMore = comments.length > limit;
@@ -95,7 +96,32 @@ export const comment = async (req, res) => {
         }
 
         // Return populated comment
-        const populated = await comment.populate("userId", "username fullname");
+        const populated = await comment.populate("userId", "username fullname profileImage");
+
+        const commenterName = populated.userId?.fullname || populated.userId?.username;
+        const myId = req.user.userId;
+
+        // Send push notification to post author if not self
+        if (post.userId && post.userId.toString() !== myId) {
+            sendCommentNotification({
+                recipientId: post.userId,
+                commenterName,
+                commentText: content,
+                postId,
+                commentId: comment._id
+            }).catch(err => console.error("Comment push notification error:", err));
+        }
+
+        // Send push notification to parent comment author if replying to a comment and parent author is different from post author & commenter
+        if (parent && parent.userId && parent.userId.toString() !== myId && parent.userId.toString() !== post.userId?.toString()) {
+            sendCommentNotification({
+                recipientId: parent.userId,
+                commenterName,
+                commentText: content,
+                postId,
+                commentId: comment._id
+            }).catch(err => console.error("Reply push notification error:", err));
+        }
 
         return res.status(201).json({ success: true, comment: populated });
     } catch (error) {
@@ -156,7 +182,7 @@ export const replies = async (req, res) => {
         const replies = await Comment.find(query)
             .sort({ createdAt: 1, _id: 1 }) // oldest first for replies
             .limit(limit + 1)
-            .populate("userId", "username fullname")
+            .populate("userId", "username fullname profileImage")
             .lean();
 
         const hasMore = replies.length > limit;
@@ -177,6 +203,66 @@ export const replies = async (req, res) => {
             .json({ success: true, replies: enriched, nextCursor, hasMore });
     } catch (error) {
         console.error("getReplies error:", error);
+        return res.status(500).json({ success: false });
+    }
+};
+
+export const deleteComment = async (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const myId = req.user.userId;
+
+        const comment = await Comment.findById(commentId);
+        if (!comment) {
+            return res
+                .status(404)
+                .json({ success: false, message: "COMMENT_NOT_FOUND" });
+        }
+
+        // Authorization check: Only the comment author can delete
+        if (comment.userId.toString() !== myId) {
+            return res
+                .status(403)
+                .json({ success: false, message: "UNAUTHORIZED" });
+        }
+
+        const { postId, parentId } = comment;
+
+        if (parentId) {
+            await Comment.findByIdAndDelete(commentId);
+
+            // Decrement parent comment's repliesCount atomically
+            await Comment.findByIdAndUpdate(parentId, {
+                $inc: { repliesCount: -1 }
+            });
+
+            // Decrement post's total commentsCount atomically
+            await Post.findByIdAndUpdate(postId, {
+                $inc: { commentsCount: -1 }
+            });
+        } else {
+            // 1. Cascade delete all nested replies attached to this comment
+            const replyDeletion = await Comment.deleteMany({
+                parentId: commentId
+            });
+            const deletedRepliesCount = replyDeletion.deletedCount || 0;
+
+            // 2. Delete the main comment itself
+            await Comment.findByIdAndDelete(commentId);
+
+            // 3. Decrement post total commentsCount by (1 comment + all deleted replies)
+            const totalRemoved = 1 + deletedRepliesCount;
+            await Post.findByIdAndUpdate(postId, {
+                $inc: { commentsCount: -totalRemoved }
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "COMMENT_DELETED"
+        });
+    } catch (error) {
+        console.error("deleteComment error:", error);
         return res.status(500).json({ success: false });
     }
 };
