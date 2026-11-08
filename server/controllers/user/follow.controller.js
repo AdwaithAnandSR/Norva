@@ -37,6 +37,7 @@ export const followUser = async (req, res) => {
                 isFollowing: true,
                 followersCount: target.followersCount
             });
+        }
 
         me.following.addToSet(targetId);
         me.followingCount = me.following.length;
@@ -102,6 +103,15 @@ export const unfollowUser = async (req, res) => {
             return res
                 .status(404)
                 .json({ success: false, message: "USER_NOT_FOUND" });
+
+        const alreadyFollowing = me.following.some(id => id.toString() === targetId);
+        if (!alreadyFollowing) {
+            return res.status(200).json({
+                success: true,
+                isFollowing: false,
+                followersCount: target.followersCount
+            });
+        }
 
         me.following.pull(targetId);
         me.followingCount = me.following.length;
